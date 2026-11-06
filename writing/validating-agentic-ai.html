@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How do you know your AI agent is right? Validating agentic AI · Farzaneh Farhadi</title>
+  <meta name="description" content="How to validate agentic AI in production with both quantitative metrics and qualitative expert review, including what to do when expert analysts disagree on the right answer.">
+  <meta name="author" content="Farzaneh Farhadi">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#0e2a35">
+  <link rel="canonical" href="https://farzanehfar.github.io/writing/validating-agentic-ai.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Farzaneh Farhadi">
+  <meta property="og:url" content="https://farzanehfar.github.io/writing/validating-agentic-ai.html">
+  <meta property="og:title" content="How do you know your AI agent is right?">
+  <meta property="og:description" content="Validating agentic AI with numbers and with people, and what to do when the experts disagree.">
+  <meta property="og:image" content="https://farzanehfar.github.io/assets/headshot.jpg">
+  <meta property="og:locale" content="en_GB">
+  <meta property="article:published_time" content="2026-11-03">
+  <meta property="article:author" content="Farzaneh Farhadi">
+  <meta property="article:section" content="Agentic AI">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="How do you know your AI agent is right?">
+  <meta name="twitter:description" content="Validating agentic AI with numbers and with people, and what to do when the experts disagree.">
+  <meta name="twitter:image" content="https://farzanehfar.github.io/assets/headshot.jpg">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "How do you know your AI agent is right?",
+    "alternativeHeadline": "Validating agentic AI with numbers and with people",
+    "description": "How to validate agentic AI in production with both quantitative metrics and qualitative expert review, including what to do when expert analysts disagree on the right answer.",
+    "datePublished": "2026-11-03",
+    "dateModified": "2026-11-03",
+    "inLanguage": "en-GB",
+    "articleSection": "Agentic AI",
+    "keywords": "agentic AI evaluation, AI agent validation, LLM evaluation, LLM-as-a-judge, human evaluation, inter-annotator agreement, fraud detection, financial crime",
+    "mainEntityOfPage": "https://farzanehfar.github.io/writing/validating-agentic-ai.html",
+    "url": "https://farzanehfar.github.io/writing/validating-agentic-ai.html",
+    "image": "https://farzanehfar.github.io/assets/headshot.jpg",
+    "author": { "@type": "Person", "@id": "https://farzanehfar.github.io/#person", "name": "Farzaneh Farhadi", "url": "https://farzanehfar.github.io/" },
+    "publisher": { "@type": "Person", "@id": "https://farzanehfar.github.io/#person", "name": "Farzaneh Farhadi" }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Farzaneh Farhadi</a>
+    <nav class="nav">
+      <a href="../index.html#impact">Impact</a>
+      <a href="../index.html#writing">Writing</a>
+      <a class="nav-cta" href="../index.html#contact">Get in touch</a>
+    </nav>
+  </div>
+</header>
+
+<div class="article-hero">
+  <div class="inner">
+    <a class="back" href="../index.html#writing">← All writing</a>
+    <h1>How do you know your AI agent is right?</h1>
+    <p class="meta">November 2026 · 8 min read · Validating agentic AI with numbers and with people</p>
+  </div>
+</div>
+
+<main class="article">
+  <p>Every AI team has a moment where someone runs a new agent on a handful of cases, reads the output and says, "This looks really good." I've learned to be wary of that moment. It feels like progress, but it tells you almost nothing about how the agent will behave on the thousandth case, or the strange one nobody thought to test.</p>
+
+  <p>In fraud and financial crime, "looks good" isn't good enough. A summary that misses one important transaction can send an investigation in the wrong direction. A confident answer on a case that should have been escalated can cause real harm. So validation isn't a step at the end of the project. It is most of the project.</p>
+
+  <p>If I had to put my view in one line, it would be this: numbers tell you how often the agent is right, and people tell you whether being right is actually useful. You need both, before launch and long after it.</p>
+
+  <h2>Why agents are harder to check than models</h2>
+
+  <p>With a classic machine learning model, validation is fairly clear. You have an input, a prediction and a label, and you compare them.</p>
+
+  <p>An agent is different. It reads a case, decides what information it needs, calls tools to fetch data, reasons over what it finds and then writes something for a person to act on. That's many steps, and each one can go wrong. An agent can reach the right answer for the wrong reason, or produce something that reads well but has one wrong detail in the middle. It can also give slightly different answers to the same case on different runs.</p>
+
+  <p>That's why a single accuracy number is never enough on its own.</p>
+
+  <h2>The numbers: quantitative validation</h2>
+
+  <p>The natural starting point is labelled data. In fraud work you usually have two kinds of cases: labelled ones, where the outcome is known, and unlabelled ones, where it isn't. Most teams build and test against the labelled cases, because that's where you can measure properly. On those, I look at a few things.</p>
+
+  <ul>
+    <li><strong>Outcome quality.</strong> Precision and recall, not just accuracy. In fraud, a false positive costs an analyst's time and a missed case costs real money, so you need to see both sides.</li>
+    <li><strong>Faithfulness.</strong> Every fact in the agent's output should trace back to the source data. A summary that is 95% right but invents one transaction amount is not 95% good. It's a problem.</li>
+    <li><strong>The steps, not just the answer.</strong> Did the agent pull the right data and use the right tools? Checking the path catches problems that the final answer can hide.</li>
+    <li><strong>Consistency.</strong> Run the same case several times. If the conclusion changes, people won't trust it, and they'd be right not to.</li>
+    <li><strong>Latency and cost.</strong> A correct answer that arrives too slowly, or costs too much per case, still fails in production.</li>
+  </ul>
+
+  <p>Unlabelled cases are easy to ignore, but I've come to see them as some of the most valuable data a team has. Labelled sets tend to lean towards cases that were clear enough to resolve, while the real world is messier. Running the agent quietly on unlabelled cases, checking the spread of its outputs and sending a sample to analysts for review tells you how it behaves on real traffic. Each case an analyst reviews becomes new labelled data.</p>
+
+  <h3>A note on using an LLM as a judge</h3>
+
+  <p>One approach I recommend building towards is using a second LLM to grade the agent's output. It can check things like "Is every claim supported by the data?" or "Did the summary cover the key risk signals?" across thousands of cases, far more than any team could review by hand.</p>
+
+  <p>It comes with a condition, though: the judge needs validating too. Before trusting it, you compare its scores with human ratings on the same cases and only rely on it where they agree. Used that way, it's a powerful way to scale review. Used blindly, it's one model marking another model's homework.</p>
+
+  <blockquote>Metrics can tell you that something changed. Only people can tell you whether it matters.</blockquote>
+
+  <h2>The people: qualitative validation</h2>
+
+  <p>The analysts who use an agent every day are the best evaluators you have. A simple setup works well: a quick thumbs up or down next to every output, plus a short questionnaire so they can explain their view.</p>
+
+  <p>Both parts matter. A thumbs down tells you something is wrong. The questionnaire tells you what: whether something was missing, whether a detail was wrong, or whether the output was correct but not actually helpful. That last kind of feedback never shows up in a metric, and it's often the most important.</p>
+
+  <p>Beyond formal feedback, two other habits have been worth the time:</p>
+  <ul>
+    <li><strong>Reading the failures.</strong> Regularly sitting down with a batch of bad outputs and grouping them by type. Patterns appear quickly, and they tell you what to fix and what to start measuring.</li>
+    <li><strong>Watching behaviour, not just ratings.</strong> If analysts rate a summary highly but still re-read the whole case, they don't fully trust it yet. What people do is often more honest than what they say.</li>
+  </ul>
+
+  <h2>When the experts disagree</h2>
+
+  <p>One of the hardest problems in fraud AI comes from suspicious cases. On clear-cut fraud, analysts usually agree. On the grey cases, the ones that look odd but aren't obviously fraud, experienced analysts can reach different conclusions about the same case. The same agent output can be "right" for one reviewer and "wrong" for another.</p>
+
+  <p>That breaks a quiet assumption behind most evaluation: that there is one correct answer to compare against. When the experts disagree, the label itself is uncertain. Here is how I think about it now, and what I'd recommend to any team in the same situation.</p>
+
+  <p><strong>1. Measure how much people agree first.</strong> Before judging the agent, have several analysts review the same sample of cases and measure how often they agree with each other. Statistics like Cohen's kappa are made for this. That agreement level is your realistic ceiling. If two experienced analysts only agree on 70% of grey cases, expecting an agent to hit 95% against either of them doesn't make sense.</p>
+
+  <p><strong>2. Treat "unclear" as a real category.</strong> Split your evaluation into clear cases and ambiguous ones, and report results for each separately. One blended accuracy number hides the problem. An agent can look excellent overall while struggling exactly where analysts need help most.</p>
+
+  <p><strong>3. On ambiguous cases, judge the work, not just the verdict.</strong> When the right answer is genuinely uncertain, a better question is "Did the agent help the analyst decide well?" Did it find the relevant evidence? Did it present the signals on both sides? Did it say it was uncertain, rather than sounding confident? Did it recommend escalating to a person? These can be scored with a simple rubric, and analysts tend to agree on them much more than on the final verdict.</p>
+
+  <p><strong>4. Settle disagreements and write down why.</strong> For a smaller trusted set of cases, have a senior analyst or a small panel make the final call when reviewers disagree, and record the reasoning. That gives you a reliable reference set to test against, and the written reasons often become useful guidance for the team, not just the AI.</p>
+
+  <p><strong>5. Use real outcomes when they arrive.</strong> Some cases eventually get a confirmed outcome, such as confirmed fraud or a resolved customer dispute. That later ground truth is the most honest label you'll get. It's worth feeding it back into evaluation, even if it arrives weeks later.</p>
+
+  <p><strong>6. Design for the grey zone.</strong> For ambiguous cases, the agent's job shouldn't be to make the decision. It should make the decision easier and better informed: here is the evidence, here is how confident I am, here is why a person should look closely. Keeping the analyst in charge of these cases isn't a weakness of the system. It's the right design.</p>
+
+  <h2>How the two fit together</h2>
+
+  <p>Quantitative and qualitative validation aren't competing approaches. They feed each other in a loop:</p>
+  <ul>
+    <li>People find what matters, through feedback, questionnaires and reading failures.</li>
+    <li>The team turns that into something measurable and track it on labelled data at scale.</li>
+    <li>The numbers show where things are changing or going wrong.</li>
+    <li>People look closely at those areas again, and the loop continues.</li>
+  </ul>
+
+  <p>Teams that only use metrics end up optimising numbers nobody cares about. Teams that only use feedback can't tell whether last week's change made things better or worse. You need the loop.</p>
+
+  <h2>Validation doesn't stop at launch</h2>
+
+  <p>An agent that passed every test on launch day can quietly get worse. The data changes, fraud patterns change, and a small prompt tweak or model update can have effects nobody expected. So it's worth re-running the labelled test set whenever something changes, keeping a close eye on feedback trends, and continuing to sample real cases for review.</p>
+
+  <h2>Before you ship an agent, ask</h2>
+  <ul>
+    <li>Do we have a labelled test set, split into clear and ambiguous cases?</li>
+    <li>Do we know how often our own experts agree with each other?</li>
+    <li>Can every fact in the output be traced to the source data?</li>
+    <li>Does the agent give consistent answers across repeated runs?</li>
+    <li>Are speed and cost within what the business can accept?</li>
+    <li>Have real users tried it on real work, and can they easily tell us when it's wrong?</li>
+    <li>Do we know how we'll spot it getting worse after launch?</li>
+  </ul>
+
+  <p>If any answer is no, it's not ready yet. That isn't caution for its own sake. In a bank, trust is the product, and validation is how you earn it.</p>
+
+  <div class="author-box">
+    <img src="../assets/headshot.jpg" alt="Farzaneh Farhadi, AI Engineering Leader" width="64" height="64" loading="lazy">
+    <p><strong>Farzaneh Farhadi, PhD</strong> leads Agentic AI engineering at Mozn, building AI for fraud detection and financial crime. <a href="../index.html">More about me →</a></p>
+  </div>
+  <p class="disclaimer">Views are my own and don't represent my employer or its clients.</p>
+</main>
+</body>
+</html>

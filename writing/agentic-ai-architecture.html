@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What actually matters when you design an agentic AI system · Farzaneh Farhadi</title>
+  <meta name="description" content="An agentic AI architecture guide: workflows vs autonomy, single vs multi-agent, tool design and MCP, model choice, RAG vs fine-tuning, context, guardrails, observability and human-in-the-loop design.">
+  <meta name="author" content="Farzaneh Farhadi">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#0e2a35">
+  <link rel="canonical" href="https://farzanehfar.github.io/writing/agentic-ai-architecture.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Farzaneh Farhadi">
+  <meta property="og:url" content="https://farzanehfar.github.io/writing/agentic-ai-architecture.html">
+  <meta property="og:title" content="What actually matters when you design an agentic AI system">
+  <meta property="og:description" content="The architecture decisions that turn an agent demo into a system people can rely on.">
+  <meta property="og:image" content="https://farzanehfar.github.io/assets/headshot.jpg">
+  <meta property="og:locale" content="en_GB">
+  <meta property="article:published_time" content="2026-11-03">
+  <meta property="article:author" content="Farzaneh Farhadi">
+  <meta property="article:section" content="Architecture">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="What actually matters when you design an agentic AI system">
+  <meta name="twitter:description" content="The architecture decisions that turn an agent demo into a system people can rely on.">
+  <meta name="twitter:image" content="https://farzanehfar.github.io/assets/headshot.jpg">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "What actually matters when you design an agentic AI system",
+    "description": "An agentic AI architecture guide: workflows vs autonomy, single vs multi-agent, tool design and MCP, model choice, RAG vs fine-tuning, context, guardrails, observability and human-in-the-loop design.",
+    "datePublished": "2026-11-03",
+    "dateModified": "2026-11-03",
+    "inLanguage": "en-GB",
+    "articleSection": "Architecture",
+    "keywords": "agentic AI architecture, RAG vs fine-tuning, retrieval-augmented generation, fine-tuning, multi-agent systems, AI agent design, MCP, LLM orchestration, guardrails, observability, human-in-the-loop, AI system design",
+    "mainEntityOfPage": "https://farzanehfar.github.io/writing/agentic-ai-architecture.html",
+    "url": "https://farzanehfar.github.io/writing/agentic-ai-architecture.html",
+    "image": "https://farzanehfar.github.io/assets/headshot.jpg",
+    "author": { "@type": "Person", "@id": "https://farzanehfar.github.io/#person", "name": "Farzaneh Farhadi", "url": "https://farzanehfar.github.io/" },
+    "publisher": { "@type": "Person", "@id": "https://farzanehfar.github.io/#person", "name": "Farzaneh Farhadi" }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Farzaneh Farhadi</a>
+    <nav class="nav">
+      <a href="../index.html#impact">Impact</a>
+      <a href="../index.html#writing">Writing</a>
+      <a class="nav-cta" href="../index.html#contact">Get in touch</a>
+    </nav>
+  </div>
+</header>
+
+<div class="article-hero">
+  <div class="inner">
+    <a class="back" href="../index.html#writing">← All writing</a>
+    <h1>What actually matters when you design an agentic AI system</h1>
+    <p class="meta">November 2026 · 10 min read · Architecture</p>
+  </div>
+</div>
+
+<main class="article">
+  <p>You can build an impressive AI agent demo in an afternoon. Give a model a few tools, write a good prompt, and it will happily search, reason and write something that looks smart. Building a system that people rely on every day is a different job, and it usually takes months.</p>
+
+  <p>Almost none of that difference comes from the model. It comes from architecture: how the work is structured, what the agent is allowed to touch, how you see what it's doing, and what happens when it gets something wrong.</p>
+
+  <p>These are the design decisions I think matter most, and the trade-offs behind each one.</p>
+
+  <h2>The shape of a good agentic system</h2>
+
+  <p>Before the details, here is the overall picture I design towards. The model sits in the middle, but most of the boxes around it are about control, visibility and trust.</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 800 600" role="img" aria-labelledby="dg-title dg-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="dg-title">Reference architecture for an agentic AI system</title>
+      <desc id="dg-desc">Users and human review at the top, an orchestrator coordinating specialised agents, a tool and data access layer, and a model layer at the bottom. Guardrails run down the left side, and evaluation and observability down the right. An audit trail runs along the base.</desc>
+      <style>
+        .t { font-family: Inter, -apple-system, sans-serif; }
+        .h { font-size: 15px; font-weight: 600; }
+        .s { font-size: 12px; }
+        .side { font-size: 14px; font-weight: 600; letter-spacing: .06em; }
+      </style>
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#c9a45c"/>
+        </marker>
+      </defs>
+
+      <!-- Guardrails (left) -->
+      <rect x="10" y="20" width="90" height="510" rx="12" fill="#f6eedd" stroke="#c9a45c"/>
+      <text class="t side" x="55" y="275" text-anchor="middle" fill="#0e2a35" transform="rotate(-90 55 275)">GUARDRAILS</text>
+      <text class="t s" x="55" y="420" text-anchor="middle" fill="#5a6670" transform="rotate(-90 55 420)">input · output · actions</text>
+
+      <!-- Observability (right) -->
+      <rect x="700" y="20" width="90" height="510" rx="12" fill="#e3f0f0" stroke="#1f6f78"/>
+      <text class="t side" x="745" y="275" text-anchor="middle" fill="#0e2a35" transform="rotate(90 745 275)">EVALUATION &amp; OBSERVABILITY</text>
+      <text class="t s" x="745" y="470" text-anchor="middle" fill="#5a6670" transform="rotate(90 745 470)">traces · metrics</text>
+
+      <!-- Users -->
+      <rect x="120" y="20" width="560" height="70" rx="12" fill="#ffffff" stroke="#e4ddd0"/>
+      <text class="t h" x="400" y="50" text-anchor="middle" fill="#0e2a35">People: users &amp; human review</text>
+      <text class="t s" x="400" y="72" text-anchor="middle" fill="#5a6670">requests · approvals · overrides · feedback</text>
+
+      <line x1="400" y1="92" x2="400" y2="118" stroke="#c9a45c" stroke-width="2" marker-end="url(#arr)" marker-start="url(#arr)"/>
+
+      <!-- Orchestrator -->
+      <rect x="120" y="122" width="560" height="70" rx="12" fill="#0e2a35"/>
+      <text class="t h" x="400" y="152" text-anchor="middle" fill="#ffffff">Orchestrator</text>
+      <text class="t s" x="400" y="174" text-anchor="middle" fill="#c9a45c">explicit workflow · state · routing · retries · limits</text>
+
+      <line x1="400" y1="194" x2="400" y2="220" stroke="#c9a45c" stroke-width="2" marker-end="url(#arr)" marker-start="url(#arr)"/>
+
+      <!-- Agents -->
+      <rect x="120" y="224" width="176" height="76" rx="12" fill="#16404d"/>
+      <text class="t h" x="208" y="256" text-anchor="middle" fill="#ffffff">Research agent</text>
+      <text class="t s" x="208" y="278" text-anchor="middle" fill="#cfe3e5">gathers context</text>
+      <rect x="312" y="224" width="176" height="76" rx="12" fill="#16404d"/>
+      <text class="t h" x="400" y="256" text-anchor="middle" fill="#ffffff">Analysis agent</text>
+      <text class="t s" x="400" y="278" text-anchor="middle" fill="#cfe3e5">reasons &amp; checks</text>
+      <rect x="504" y="224" width="176" height="76" rx="12" fill="#16404d"/>
+      <text class="t h" x="592" y="256" text-anchor="middle" fill="#ffffff">Writer agent</text>
+      <text class="t s" x="592" y="278" text-anchor="middle" fill="#cfe3e5">drafts with sources</text>
+
+      <line x1="400" y1="302" x2="400" y2="328" stroke="#c9a45c" stroke-width="2" marker-end="url(#arr)" marker-start="url(#arr)"/>
+
+      <!-- Tools -->
+      <rect x="120" y="332" width="560" height="76" rx="12" fill="#ffffff" stroke="#1f6f78" stroke-width="1.5"/>
+      <text class="t h" x="400" y="362" text-anchor="middle" fill="#0e2a35">Tools &amp; data access (MCP · APIs · retrieval)</text>
+      <text class="t s" x="400" y="386" text-anchor="middle" fill="#5a6670">least-privilege permissions · clear contracts · every call logged</text>
+
+      <line x1="400" y1="410" x2="400" y2="436" stroke="#c9a45c" stroke-width="2" marker-end="url(#arr)" marker-start="url(#arr)"/>
+
+      <!-- Models -->
+      <rect x="120" y="440" width="176" height="90" rx="12" fill="#f3ede2" stroke="#e4ddd0"/>
+      <text class="t h" x="208" y="478" text-anchor="middle" fill="#0e2a35">Large LLMs</text>
+      <text class="t s" x="208" y="500" text-anchor="middle" fill="#5a6670">hard reasoning</text>
+      <rect x="312" y="440" width="176" height="90" rx="12" fill="#f3ede2" stroke="#e4ddd0"/>
+      <text class="t h" x="400" y="478" text-anchor="middle" fill="#0e2a35">Small / fast models</text>
+      <text class="t s" x="400" y="500" text-anchor="middle" fill="#5a6670">routine steps</text>
+      <rect x="504" y="440" width="176" height="90" rx="12" fill="#f3ede2" stroke="#e4ddd0"/>
+      <text class="t h" x="592" y="478" text-anchor="middle" fill="#0e2a35">Classic ML &amp; rules</text>
+      <text class="t s" x="592" y="500" text-anchor="middle" fill="#5a6670">structured data</text>
+
+      <!-- Audit -->
+      <rect x="10" y="548" width="780" height="40" rx="10" fill="#0e2a35"/>
+      <text class="t h" x="400" y="573" text-anchor="middle" fill="#c9a45c">Audit trail: who asked, what the agent saw, what it did, who approved</text>
+    </svg>
+    <figcaption>A reference shape for agentic systems. The model is one layer; most of the design effort goes into the layers around it.</figcaption>
+  </figure>
+
+  <h2>1. Start with a workflow, and earn autonomy</h2>
+
+  <p>"Agentic" covers a wide range. At one end is a fixed pipeline where an LLM does one step. At the other is a fully autonomous agent that decides its own plan, picks its own tools and keeps going until it thinks it's finished.</p>
+
+  <p>My default is to use the least autonomy that solves the problem. Most real tasks have a shape you already know: gather information, analyse it, produce something. Encoding that shape as an explicit workflow, for example as a graph of steps with clear transitions, makes the system easier to test, easier to debug and far more predictable. You then give the model freedom inside the steps where judgement actually helps.</p>
+
+  <p>Autonomy should be earned. When evaluation shows a step is reliable, you can loosen the structure around it. Going the other way, starting fully autonomous and trying to add control later, is much harder.</p>
+
+  <h2>2. One agent or many?</h2>
+
+  <p>Multi-agent systems are attractive, and they're often the right answer, but every extra agent adds coordination, latency and another place for things to go wrong. Debugging a conversation between five agents is not fun.</p>
+
+  <p>I split work into separate agents when there's a real reason:</p>
+  <ul>
+    <li>the tasks need <strong>different tools or permissions</strong>,</li>
+    <li>they need <strong>very different context</strong>, and mixing it would confuse the model,</li>
+    <li>they can <strong>run in parallel</strong> and save real time,</li>
+    <li>or they need to be <strong>tested and improved independently</strong>.</li>
+  </ul>
+  <p>If none of those apply, one well-designed agent is usually better. When there are several, the shared state between them should be explicit and visible, not hidden inside chat messages.</p>
+
+  <h2>3. Tools are the real interface</h2>
+
+  <p>An agent is only as good as the tools it can use. In my experience, a surprising number of "the model is wrong" problems turn out to be "the tool is confusing" problems.</p>
+
+  <p>Good tools are small and focused, with clear names, clear descriptions and predictable inputs and outputs. They return helpful error messages, because the model will read them and try again. Standards like the Model Context Protocol (MCP) make it much easier to connect agents to systems in a consistent way, and to reuse tools across agents.</p>
+
+  <p>Permissions belong here too. An agent should act with the least access it needs, ideally the same access as the person it's working for, and every tool call should be logged. If an agent can read or change something, you need to be able to say exactly why it was allowed to.</p>
+
+  <h2>4. Use the right model for each step</h2>
+
+  <p>Not every step needs your biggest model. Some steps are better handled by a simple rule, some by a classic machine learning model, some by a small fast LLM, and only some by a large reasoning model. Matching the model to the step makes the system cheaper, faster and often more accurate.</p>
+
+  <p>Where the models run is an architecture decision as well. Hosted APIs are fast to start with. Self-hosted or private deployments can make more sense when data is sensitive, when it must stay in a particular region, or when volumes are high enough that cost per call starts to dominate. I try to keep the model behind a clean interface so this decision can change later without rebuilding everything.</p>
+
+  <blockquote>The model you use today will be replaced within a year. Good architecture makes that change boring.</blockquote>
+
+  <h2>5. Context is a design decision</h2>
+
+  <p>What you put in front of the model matters as much as which model you use. More context isn't automatically better. Long, noisy context makes models slower, more expensive and easier to distract.</p>
+
+  <p>I treat context as something to design: retrieve only what's relevant, summarise long histories, and keep the instructions clear and stable. Wherever possible, I ask the agent to point to its sources, so a person can check each claim against the original data. That one habit makes systems far easier to trust and to debug.</p>
+
+  <h2>6. RAG, fine-tuning, or neither?</h2>
+
+  <p>This is one of the most common questions I get, and the simplest rule I know is this: <strong>use retrieval (RAG) for what the agent needs to know, and fine-tuning for how the agent needs to behave.</strong></p>
+
+  <p>RAG means fetching relevant information at the moment the agent needs it and putting it into the context. Fine-tuning means further training a model on your own examples so that a behaviour becomes part of the model itself. They solve different problems, and mixing them up is expensive.</p>
+
+  <p>Take an IT support agent for a large company as an example.</p>
+
+  <ul>
+    <li><strong>Answering "How do I set up the VPN on my new laptop?"</strong> The answer lives in the help centre, and those articles change every few weeks. This is a <strong>RAG</strong> problem. Fine-tuning the answers into the model would make them out of date by the next release, and you couldn't show the user where the answer came from. With retrieval, you update the article and the agent knows straight away, and it can link to its source.</li>
+    <li><strong>Sorting thousands of incoming tickets into the company's own 40 categories, in a fixed format, every time.</strong> This is about consistent behaviour, not changing knowledge. A large model with a long prompt can do it, but it's slow and costly at volume, and it drifts on edge cases. This is where <strong>fine-tuning</strong> a small model on a few thousand past tickets that people have labelled pays off: it becomes fast, cheap and very consistent at this one job.</li>
+    <li><strong>Both together.</strong> The full agent uses the fine-tuned small model to route each ticket, and RAG to find the right help articles before drafting a reply. Each technique does the job it's best at.</li>
+  </ul>
+
+  <p>Before either, I always try good prompting with a few examples. It's often enough, and it's by far the cheapest option to change. My usual order is: prompt first, add RAG when the agent needs knowledge it doesn't have, and fine-tune only when you need a behaviour that prompting can't make reliable, or when volume makes a smaller specialised model worth it. Fine-tuning also brings its own work: training data to maintain, evaluation to re-run and models to version. That cost should be a deliberate choice.</p>
+
+  <h2>7. Put guardrails at the edges</h2>
+
+  <p>Guardrails work best at the boundaries of the system:</p>
+  <ul>
+    <li><strong>On the way in:</strong> validate requests, and remove or mask personal data the model doesn't need.</li>
+    <li><strong>From tools:</strong> treat anything a tool returns as untrusted. Text inside a document or web page can contain instructions, and an agent shouldn't follow them. This "prompt injection" risk is one of the most underrated problems in agent design.</li>
+    <li><strong>On the way out:</strong> check that outputs follow the expected structure and don't contain things they shouldn't.</li>
+    <li><strong>On actions:</strong> anything with real impact, like sending, changing or deleting, should be limited, and the important actions should need a person's approval.</li>
+  </ul>
+
+  <h2>8. Build observability in from day one, and design for failure</h2>
+
+  <p>If you can't see what an agent did, you can't fix it. Every run should leave a trace: the steps taken, the tools called, the inputs and outputs, the time taken and the cost. These traces are what make debugging possible, and they're the foundation for evaluation. I've written separately about <a href="validating-agentic-ai.html">how to validate whether an agent is right</a>.</p>
+
+  <p>Agents also fail in ways normal software doesn't. They loop, they time out, they get stuck on a bad tool result. So the design needs limits on steps, time and cost, sensible retries, fallbacks, and above all a graceful way to stop. An agent that says "I couldn't complete this, here's what I found" is far more useful than one that guesses.</p>
+
+  <h2>9. Treat people as part of the architecture</h2>
+
+  <p>Human oversight is often drawn as a box at the end. I think it belongs in the design from the start. Where does a person review, approve or correct? How does their feedback get captured and used? Can they easily override the agent? Is there an audit trail that shows who asked for what, what the agent saw, what it did and who approved it?</p>
+
+  <p>These questions shape the workflow, the user interface and the data model. Answer them early and the system feels trustworthy. Answer them late and you end up rebuilding.</p>
+
+  <h2>A checklist for any agentic design</h2>
+  <ul>
+    <li>Is this the least autonomy that solves the problem?</li>
+    <li>Does each agent exist for a clear reason?</li>
+    <li>Are the tools small, clear and permission-limited, with every call logged?</li>
+    <li>Is each step using the simplest model that does the job well?</li>
+    <li>Can every important claim be traced back to a source?</li>
+    <li>Are we using RAG for knowledge and fine-tuning only for behaviour we can't get reliably any other way?</li>
+    <li>Are tool outputs treated as untrusted, and are high-impact actions approved by a person?</li>
+    <li>Can we trace every run, and are there limits on steps, time and cost?</li>
+    <li>Can we swap the model without redesigning the system?</li>
+  </ul>
+
+  <p>None of this is as exciting as a new model release. But it's the difference between an agent that impresses people in a meeting and one they're still happy to rely on a year later. That's the part I enjoy most: designing systems that turn what AI can do into something people can depend on.</p>
+
+  <div class="author-box">
+    <img src="../assets/headshot.jpg" alt="Farzaneh Farhadi, AI Engineering Leader" width="64" height="64" loading="lazy">
+    <p><strong>Farzaneh Farhadi, PhD</strong> is an AI engineering leader who designs and builds agentic AI systems and the teams behind them. <a href="../index.html">More about me →</a></p>
+  </div>
+
+  <p class="disclaimer">Views are my own and don't represent my employer or its clients.</p>
+</main>
+</body>
+</html>

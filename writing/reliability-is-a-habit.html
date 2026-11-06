@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reliability is a habit, not a project · Farzaneh Farhadi</title>
+  <meta name="description" content="What I learned as an engineering manager leading three teams and 26 engineers on high-volume, real-time systems: monitoring, incidents, testing and team leads.">
+  <meta name="author" content="Farzaneh Farhadi">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#0e2a35">
+  <link rel="canonical" href="https://farzanehfar.github.io/writing/reliability-is-a-habit.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Farzaneh Farhadi">
+  <meta property="og:url" content="https://farzanehfar.github.io/writing/reliability-is-a-habit.html">
+  <meta property="og:title" content="Reliability is a habit, not a project">
+  <meta property="og:description" content="What I learned as an engineering manager leading three teams and 26 engineers on high-volume, real-time systems: monitoring, incidents, testing and team leads.">
+  <meta property="og:image" content="https://farzanehfar.github.io/assets/headshot.jpg">
+  <meta property="og:locale" content="en_GB">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="article:author" content="Farzaneh Farhadi">
+  <meta property="article:section" content="Engineering leadership">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Reliability is a habit, not a project">
+  <meta name="twitter:description" content="What I learned as an engineering manager leading three teams and 26 engineers on high-volume, real-time systems: monitoring, incidents, testing and team leads.">
+  <meta name="twitter:image" content="https://farzanehfar.github.io/assets/headshot.jpg">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Reliability is a habit, not a project",
+  "description": "What I learned as an engineering manager leading three teams and 26 engineers on high-volume, real-time systems: monitoring, incidents, testing and team leads.",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "inLanguage": "en-GB",
+  "articleSection": "Engineering leadership",
+  "keywords": "engineering manager, engineering leadership, reliability, incident management, test automation, team leads",
+  "mainEntityOfPage": "https://farzanehfar.github.io/writing/reliability-is-a-habit.html",
+  "url": "https://farzanehfar.github.io/writing/reliability-is-a-habit.html",
+  "image": "https://farzanehfar.github.io/assets/headshot.jpg",
+  "author": {
+    "@type": "Person",
+    "@id": "https://farzanehfar.github.io/#person",
+    "name": "Farzaneh Farhadi",
+    "url": "https://farzanehfar.github.io/"
+  },
+  "publisher": {
+    "@type": "Person",
+    "@id": "https://farzanehfar.github.io/#person",
+    "name": "Farzaneh Farhadi"
+  }
+}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Farzaneh Farhadi</a>
+    <nav class="nav">
+      <a href="../index.html#impact">Impact</a>
+      <a href="../index.html#writing">Writing</a>
+      <a class="nav-cta" href="../index.html#contact">Get in touch</a>
+    </nav>
+  </div>
+</header>
+
+<div class="article-hero">
+  <div class="inner">
+    <a class="back" href="../index.html#writing">← All writing</a>
+    <h1>Reliability is a habit, not a project</h1>
+    <p class="meta">October 2026 · 6 min read</p>
+  </div>
+</div>
+
+<main class="article">
+
+  <p>In a previous role I led three engineering teams, 26 people in total, working on high-volume, real-time transaction systems. When something went wrong, customers noticed straight away. There was no quiet period to fix things in the background.</p>
+
+  <p>Over that time, reliability improved a lot. People sometimes ask what the big change was. The honest answer is that there wasn't one. There were lots of small ones, repeated until they became normal.</p>
+
+  <h2>Why "reliability projects" don't work</h2>
+
+  <p>Most organisations treat reliability as a project. Something breaks badly, a task force is formed, a list of fixes is agreed, and for a few months things get better. Then the roadmap fills up again, the task force goes back to feature work, and the same problems slowly come back.</p>
+
+  <p>I've seen this happen in several places, and I've been part of it myself. What I learned is that reliability doesn't come from a project. It comes from what a team does every day without being asked.</p>
+
+  <h2>Make problems visible early</h2>
+
+  <p>The first thing we worked on was monitoring, not because dashboards are exciting, but because you can't fix what you can't see. If the first sign of a problem is a customer complaint, you're already too late.</p>
+
+  <p>We focused on a simple question for each service: "How would we know this is getting worse before it breaks?" That changed the conversation from collecting metrics to finding the few signals that actually warn you.</p>
+
+  <h2>Treat incidents as lessons, not blame</h2>
+
+  <p>When an incident happens, people's first instinct is to protect themselves. If the review afterwards feels like a trial, they'll share less next time, and you'll learn less.</p>
+
+  <p>We made incident reviews about the system, not the person. What made this mistake easy to make? What would have caught it sooner? Every review had to end with at least one concrete change, and someone who owned it. Over time, people started bringing up near-misses on their own, which is when I knew the culture had shifted.</p>
+
+  <h2>Tests and releases are where reliability is won</h2>
+
+  <p>My background is in test automation. I spent years at bol.com and OCLC building test suites and release pipelines, so I may be biased. But I really believe most outages are decided long before production, in what gets tested and how changes get released.</p>
+
+  <p>We put more effort into automated testing, clearer code review standards and safer release processes. None of this is new. The difference was being consistent about it, including when deadlines were tight. Especially when deadlines were tight, because that's when shortcuts cause the most damage.</p>
+
+  <blockquote>The standards that matter are the ones a team keeps when nobody is checking.</blockquote>
+
+  <h2>Give engineers better tools, then get out of the way</h2>
+
+  <p>Large codebases are hard to understand, and when people can't understand code, they're nervous about changing it. That nervousness slows everything down and, oddly, makes mistakes more likely.</p>
+
+  <p>We introduced AI-assisted development tools like Sourcegraph Cody and Deep Search to help engineers find their way around the code, understand unfamiliar services and debug faster. The point wasn't to replace anyone's judgement. It was to make it easier for engineers to feel confident in what they were changing.</p>
+
+  <h2>Leaders set the habit</h2>
+
+  <p>With 26 people across three teams, I couldn't be in every decision, and I shouldn't have been. My job was to make the right behaviour the easy behaviour, and to back the team leads who held the line.</p>
+
+  <p>A lot of my time went into coaching those team leads. When they felt confident saying "no, this isn't ready to release" to a senior stakeholder, and knew I'd support them, reliability stopped depending on me. That's the moment it became a habit rather than a project.</p>
+
+  <h2>What I'd tell a new engineering manager</h2>
+
+  <ul>
+    <li>Pick a few warning signals that matter, and watch them every day.</li>
+    <li>Make it safe to talk about mistakes, or you'll only hear about the big ones.</li>
+    <li>Protect testing and release standards most when the pressure is highest.</li>
+    <li>Invest in your team leads. Their confidence is your reliability.</li>
+  </ul>
+
+  <p>None of these are clever ideas. Doing them consistently, week after week, is the hard part, and it's the part that works.</p>
+
+  <div class="author-box">
+    <img src="../assets/headshot.jpg" alt="Farzaneh Farhadi, AI Engineering Leader" width="64" height="64" loading="lazy">
+    <p><strong>Farzaneh Farhadi, PhD</strong> leads Agentic AI engineering at Mozn and previously led three engineering teams on high-volume, real-time systems. <a href="../index.html">More about me →</a></p>
+  </div>
+  <p class="disclaimer">Views are my own and don't represent my employer or its clients.</p>
+</main>
+</body>
+</html>

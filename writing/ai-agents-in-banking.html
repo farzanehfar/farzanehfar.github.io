@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What actually changes when you put AI agents inside a bank · Farzaneh Farhadi</title>
+  <meta name="description" content="Lessons from leading agentic AI engineering for fraud detection and financial crime: trust, data access, LLM evaluation and when not to use an agent.">
+  <meta name="author" content="Farzaneh Farhadi">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#0e2a35">
+  <link rel="canonical" href="https://farzanehfar.github.io/writing/ai-agents-in-banking.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Farzaneh Farhadi">
+  <meta property="og:url" content="https://farzanehfar.github.io/writing/ai-agents-in-banking.html">
+  <meta property="og:title" content="What actually changes when you put AI agents inside a bank">
+  <meta property="og:description" content="Lessons from leading agentic AI engineering for fraud detection and financial crime: trust, data access, LLM evaluation and when not to use an agent.">
+  <meta property="og:image" content="https://farzanehfar.github.io/assets/headshot.jpg">
+  <meta property="og:locale" content="en_GB">
+  <meta property="article:published_time" content="2026-11-01">
+  <meta property="article:author" content="Farzaneh Farhadi">
+  <meta property="article:section" content="Agentic AI">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="What actually changes when you put AI agents inside a bank">
+  <meta name="twitter:description" content="Lessons from leading agentic AI engineering for fraud detection and financial crime: trust, data access, LLM evaluation and when not to use an agent.">
+  <meta name="twitter:image" content="https://farzanehfar.github.io/assets/headshot.jpg">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "What actually changes when you put AI agents inside a bank",
+  "description": "Lessons from leading agentic AI engineering for fraud detection and financial crime: trust, data access, LLM evaluation and when not to use an agent.",
+  "datePublished": "2026-11-01",
+  "dateModified": "2026-11-01",
+  "inLanguage": "en-GB",
+  "articleSection": "Agentic AI",
+  "keywords": "agentic AI, AI agents in banking, LLM evaluation, fraud detection, financial crime, MCP, responsible AI",
+  "mainEntityOfPage": "https://farzanehfar.github.io/writing/ai-agents-in-banking.html",
+  "url": "https://farzanehfar.github.io/writing/ai-agents-in-banking.html",
+  "image": "https://farzanehfar.github.io/assets/headshot.jpg",
+  "author": {
+    "@type": "Person",
+    "@id": "https://farzanehfar.github.io/#person",
+    "name": "Farzaneh Farhadi",
+    "url": "https://farzanehfar.github.io/"
+  },
+  "publisher": {
+    "@type": "Person",
+    "@id": "https://farzanehfar.github.io/#person",
+    "name": "Farzaneh Farhadi"
+  }
+}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Farzaneh Farhadi</a>
+    <nav class="nav">
+      <a href="../index.html#impact">Impact</a>
+      <a href="../index.html#writing">Writing</a>
+      <a class="nav-cta" href="../index.html#contact">Get in touch</a>
+    </nav>
+  </div>
+</header>
+
+<div class="article-hero">
+  <div class="inner">
+    <a class="back" href="../index.html#writing">← All writing</a>
+    <h1>What actually changes when you put AI agents inside a bank</h1>
+    <p class="meta">November 2026 · 7 min read</p>
+  </div>
+</div>
+
+<main class="article">
+
+  <p>When people ask me what I work on, I say "AI agents for fraud and financial crime", and I can usually see them picture something clever: a model that reads transactions and catches the bad guys on its own.</p>
+
+  <p>The reality is less cinematic and, honestly, more interesting. Most of what my team does has very little to do with making the model smarter. It has to do with making the whole system something a bank can trust.</p>
+
+  <p>Here's what I've learned so far.</p>
+
+  <h2>The analyst is the customer, not the bank</h2>
+
+  <p>On paper, our customer is a bank. In practice, the person who decides whether our work succeeds is a fraud analyst with a queue of cases and not enough hours in the day.</p>
+
+  <p>One of the first things we shipped to production was a case summarisation agent. Before it, an analyst would spend around six minutes reading through a case, pulling details from different systems and writing up what they found. With the agent, that's closer to two minutes.</p>
+
+  <p>That number looks great on a slide. But the thing I watch more closely is whether analysts actually rely on the summary, or quietly go back and re-read everything anyway. If they do the second, we've saved nobody any time. We've just added another screen.</p>
+
+  <p>So we spend real time with analysts. We ask what they look at first, what they don't trust, what makes them hesitate. Those conversations shape the product far more than any benchmark does.</p>
+
+  <h2>Getting to the data is half the job</h2>
+
+  <p>An agent is only as useful as what it can see. In a bank, the information an analyst needs lives in several systems, owned by different teams, with different access rules. That's not a problem you solve with a better prompt.</p>
+
+  <p>A lot of our engineering effort goes into the plumbing: connecting agents to enterprise systems safely through APIs and MCP, making sure they only see what they're allowed to see, and logging what they looked at so anyone can check later. It isn't glamorous work, but it's the difference between a demo and a product.</p>
+
+  <blockquote>A demo shows what a model can do. A product shows what a model can do safely, every day, with real data.</blockquote>
+
+  <h2>"It looks good" is not an evaluation</h2>
+
+  <p>Early in any AI project, there's a moment where someone runs the system on a handful of examples, reads the output and says, "This looks really good." I've learned to treat that moment as a warning sign, not a milestone.</p>
+
+  <p>Before we build anything now, we agree on how we'll measure it. For a fraud model that might be precision and recall, because a false positive costs an analyst's time and a false negative costs real money. For a summarisation agent it might be accuracy against a reviewed set of cases, plus latency, because a correct answer that arrives too slowly doesn't help anyone.</p>
+
+  <p>The goal should always be a specific number you can test against. Even a small reduction in false-positive investigations sounds modest, but in a high-volume fraud operation it adds up to a lot of analyst hours. And because it's measurable, you can build analyst feedback into the loop and know whether you're actually getting there.</p>
+
+  <h2>Not everything should be an agent</h2>
+
+  <p>This might be an unpopular opinion in 2026, but I think one of the most useful things an AI leader can do is say "we don't need an LLM for this."</p>
+
+  <p>Some problems are better solved by a well-tuned gradient boosting model. Some are better solved by a simple rule. Agents are powerful when a task needs reasoning across messy, unstructured information, like pulling a case together from notes, transactions and customer history. They're expensive and harder to test when the task is really just a classification.</p>
+
+  <p>Choosing the simpler option isn't a lack of ambition. It frees up the team's time for the places where agents really earn their keep.</p>
+
+  <h2>Trust is built in the architecture</h2>
+
+  <p>In a regulated industry, you will eventually be asked "why did the system say this?" by someone who isn't an engineer: an auditor, a regulator, a head of compliance. You want to be able to answer clearly.</p>
+
+  <p>That means the explanation, the audit trail and the human check-point have to be part of the design from the start. Trying to add them after launch is painful, and it usually means rebuilding things you thought were finished.</p>
+
+  <p>I ask my team three questions about every agent we build:</p>
+  <ul>
+    <li>Can a person see what information it used?</li>
+    <li>Can a person override it easily?</li>
+    <li>Will we know quickly if it starts getting worse?</li>
+  </ul>
+  <p>If the answer to any of them is no, we're not ready to ship.</p>
+
+  <h2>What this means for leading the team</h2>
+
+  <p>Leading an agentic AI team is different from leading a traditional engineering team in one important way. The work sits right between software engineering and data science, and both groups have to respect what the other brings.</p>
+
+  <p>Engineers bring discipline: code review, CI/CD, testing, monitoring. Data scientists bring rigour about data and evaluation. When I get the culture right, those two things meet in the middle and we end up with AI that behaves like well-engineered software. When I get it wrong, we end up with clever notebooks that never make it to production.</p>
+
+  <p>Getting that culture right is most of my job. The models will keep improving on their own. The habits that let a bank actually trust them have to be built by people.</p>
+
+  <div class="author-box">
+    <img src="../assets/headshot.jpg" alt="Farzaneh Farhadi, AI Engineering Leader" width="64" height="64" loading="lazy">
+    <p><strong>Farzaneh Farhadi, PhD</strong> leads Agentic AI engineering at Mozn, building AI for fraud detection and financial crime. <a href="../index.html">More about me →</a></p>
+  </div>
+  <p class="disclaimer">Views are my own and don't represent my employer or its clients.</p>
+</main>
+</body>
+</html>
