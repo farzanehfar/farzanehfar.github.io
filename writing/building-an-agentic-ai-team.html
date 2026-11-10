@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Building an agentic AI team: hire some, grow the rest · Farzaneh Farhadi</title>
+  <meta name="description" content="How to build an agentic AI team: the roles you need, who to hire first, how to grow software engineers into AI engineers when you can't hire, and how to structure the team as it grows.">
+  <meta name="author" content="Farzaneh Farhadi">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#0e2a35">
+  <link rel="canonical" href="https://farzanehfar.github.io/writing/building-an-agentic-ai-team.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Farzaneh Farhadi">
+  <meta property="og:url" content="https://farzanehfar.github.io/writing/building-an-agentic-ai-team.html">
+  <meta property="og:title" content="Building an agentic AI team: hire some, grow the rest">
+  <meta property="og:description" content="The roles you need, who to hire first, and how to grow AI engineers from the team you already have.">
+  <meta property="og:image" content="https://farzanehfar.github.io/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="627">
+  <meta property="og:locale" content="en_GB">
+  <meta property="article:published_time" content="2026-11-10">
+  <meta property="article:author" content="Farzaneh Farhadi">
+  <meta property="article:section" content="AI leadership">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Building an agentic AI team: hire some, grow the rest">
+  <meta name="twitter:description" content="The roles you need, who to hire first, and how to grow AI engineers from the team you already have.">
+  <meta name="twitter:image" content="https://farzanehfar.github.io/assets/og-image.jpg">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Building an agentic AI team: hire some, grow the rest",
+    "description": "How to build an agentic AI team: the roles you need, who to hire first, how to grow software engineers into AI engineers when you can't hire, and how to structure the team as it grows.",
+    "datePublished": "2026-11-10",
+    "dateModified": "2026-11-10",
+    "inLanguage": "en-GB",
+    "articleSection": "AI leadership",
+    "keywords": "AI team structure, building an AI team, hiring AI engineers, AI engineering leadership, upskilling engineers, agentic AI team, Head of AI, AI organisation design",
+    "mainEntityOfPage": "https://farzanehfar.github.io/writing/building-an-agentic-ai-team.html",
+    "url": "https://farzanehfar.github.io/writing/building-an-agentic-ai-team.html",
+    "image": "https://farzanehfar.github.io/assets/headshot.jpg",
+    "author": { "@type": "Person", "@id": "https://farzanehfar.github.io/#person", "name": "Farzaneh Farhadi", "url": "https://farzanehfar.github.io/" },
+    "publisher": { "@type": "Person", "@id": "https://farzanehfar.github.io/#person", "name": "Farzaneh Farhadi" }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Farzaneh Farhadi</a>
+    <nav class="nav">
+      <a href="../index.html#impact">Impact</a>
+      <a href="../index.html#writing">Writing</a>
+      <a class="nav-cta" href="../index.html#contact">Get in touch</a>
+    </nav>
+  </div>
+</header>
+
+<div class="article-hero">
+  <div class="inner">
+    <a class="back" href="../index.html#writing">← All writing</a>
+    <h1>Building an agentic AI team: hire some, grow the rest</h1>
+    <p class="meta">November 2026 · 8 min read · AI leadership</p>
+  </div>
+</div>
+
+<main class="article">
+  <p>Most advice about building an AI team starts with a hiring plan. Hire a few machine learning experts, add some engineers, find a product manager, and off you go.</p>
+
+  <p>In real life, it's rarely that tidy. In one role, I hired a lot of software engineers as the teams grew. In others, hiring simply wasn't an option, and the question became how to build AI capability with the people already in the room. Both situations taught me something, and I think the second one is talked about far too little.</p>
+
+  <p>Here's how I think about building a team that can deliver agentic AI, whether you have a hiring budget or not.</p>
+
+  <h2>An agentic AI team is mostly an engineering team</h2>
+
+  <p>This is the most important thing I've learned. When people picture an AI team, they picture researchers and data scientists. But look at what actually makes an agent work in production: connecting it to other systems, designing tools, handling failures, logging every step, keeping it fast and affordable, and testing it properly. That's software engineering.</p>
+
+  <p>The model is one component. Everything around it is engineering work. So the foundation of a good agentic AI team is strong software engineers who are curious about AI, supported by people with deep data and evaluation skills. That's good news, because it means your existing engineers are much closer to being AI engineers than they might think.</p>
+
+  <h2>The roles you need (which aren't always separate people)</h2>
+
+  <p>In a small team, one person often covers several of these. That's fine. What matters is that every role is covered by someone, on purpose.</p>
+
+  <table class="roles">
+    <thead><tr><th>Role</th><th>What they own</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AI / software engineers</strong></td><td>The agent itself: workflows, tools, integrations, reliability and cost.</td></tr>
+      <tr><td><strong>Data scientists</strong></td><td>Data quality, model choice, and turning "is it good?" into something measurable.</td></tr>
+      <tr><td><strong>Evaluation owner</strong></td><td>Test sets, quality metrics and feedback loops. Often a hat someone wears, but it must be someone's.</td></tr>
+      <tr><td><strong>Platform engineer</strong></td><td>Shared infrastructure: model access, tracing, deployment and guardrails that every agent can reuse.</td></tr>
+      <tr><td><strong>Product owner</strong></td><td>Which problems are worth solving, and what "done" means for users.</td></tr>
+      <tr><td><strong>Domain experts</strong></td><td>The people who know the work the agent is helping with. Not on the team, but you need regular time with them.</td></tr>
+    </tbody>
+  </table>
+
+  <p>The one I see missing most often is the evaluation owner. When evaluation is everyone's job, it quietly becomes nobody's job, and the team ends up shipping on "it looks good". I've written more about that in <a href="validating-agentic-ai.html">How do you know your AI agent is right?</a></p>
+
+  <h2>If you can hire: who first?</h2>
+
+  <p>If I'm starting from a small base, my first hires are rarely researchers. I look for:</p>
+  <ul>
+    <li><strong>An engineer who has shipped LLM features to production</strong>, not just built demos. They've already felt the pain of latency, cost, odd failures and unhappy users, and they'll save the team months.</li>
+    <li><strong>Someone who is strong on data and evaluation</strong>, often a data scientist who enjoys building test sets and measuring quality as much as building models.</li>
+  </ul>
+  <p>Specialists in fine-tuning or research can come later, once you know the problems that really need them.</p>
+
+  <h3>What I look for in interviews</h3>
+
+  <p>I hired many software engineers in a previous role, and the qualities that predicted success there matter even more for AI work:</p>
+  <ul>
+    <li><strong>Judgement over buzzwords.</strong> Anyone can list frameworks. I want to hear when someone would <em>not</em> use an agent, and why.</li>
+    <li><strong>"How would you know it works?"</strong> This is my favourite question. Strong candidates talk about test cases, failure modes and measuring quality. Weaker ones talk about the model.</li>
+    <li><strong>Comfort with uncertainty.</strong> AI systems don't behave exactly the same way twice. People who need everything to be fully predictable struggle here.</li>
+    <li><strong>Clear writing.</strong> Prompts, tool descriptions and evaluation guidelines are all writing. Engineers who explain things clearly tend to build agents that behave clearly.</li>
+  </ul>
+  <p>A practical exercise works better than theory. Give candidates a real-looking agent output with a few subtle problems, and ask them to review it and suggest how they'd catch those problems automatically. You learn a lot about how they think in thirty minutes.</p>
+
+  <h2>If you can't hire: grow the team you have</h2>
+
+  <p>Hiring freezes, budget limits and long recruitment cycles are normal. Waiting for the perfect team isn't a strategy. In my experience, a team of good software engineers can become a capable AI team surprisingly quickly if you set it up well.</p>
+
+  <p><strong>Start with the curious.</strong> In every team there are a few engineers who are already experimenting with AI in their spare time. Give them the first real AI work. Their energy spreads, and they become the people others learn from.</p>
+
+  <p><strong>Learn on a real project, not a course.</strong> Courses help with vocabulary, but people really learn by shipping something. Pick a small, useful agent with a clear user and a clear measure of success, and get it into production. One shipped project teaches more than ten tutorials.</p>
+
+  <p><strong>Pair engineers with data scientists.</strong> Engineers learn to think about data and measurement. Data scientists learn about production, testing and reliability. Within a few months, both groups are noticeably stronger, and they start to speak the same language.</p>
+
+  <p><strong>Read failures together.</strong> A regular session where the team goes through bad agent outputs and works out what went wrong is one of the best learning tools I know. It builds intuition faster than anything else, and it improves the product at the same time.</p>
+
+  <p><strong>Protect learning time.</strong> If learning only happens after the "real work" is done, it never happens. Even a few hours a week, protected and visible, makes a difference. So does using AI coding tools day to day, which helps engineers build intuition for how these models behave.</p>
+
+  <p><strong>Make progress visible.</strong> Short demos where people show what they've built, including what didn't work, create momentum and give quieter team members a chance to be seen.</p>
+
+  <blockquote>The best AI engineers I've worked with weren't hired as AI engineers. They were good engineers who were given a real problem and room to learn.</blockquote>
+
+  <h2>Make engineers and data scientists one team</h2>
+
+  <p>The most common structural mistake I see is splitting the two groups: data scientists build something in a notebook, then "hand it over" to engineers to make it work in production. With agents, that handover is where quality gets lost.</p>
+
+  <p>What works better is one backlog, one definition of done and mixed pairs on the work. "Done" should include evaluation, not just working code. When both groups are responsible for the same outcome, the arguments about whose problem something is tend to disappear.</p>
+
+  <h2>How the structure changes as you grow</h2>
+
+  <ul>
+    <li><strong>Around 3 to 6 people:</strong> one team, one product focus. Everyone touches everything, and that's a strength.</li>
+    <li><strong>Around 8 to 15 people:</strong> split into teams around products or user problems, not around skills. At this point, a small shared platform starts to pay off, so each team doesn't rebuild model access, tracing and evaluation tools.</li>
+    <li><strong>Beyond 20 people:</strong> a platform team serving several product teams, team leads who can run their areas independently, and a regular forum where engineers and data scientists across teams share what's working. This is also when developing team leads from within becomes essential, because you can't be in every decision.</li>
+  </ul>
+
+  <h2>Mistakes I'd avoid</h2>
+  <ul>
+    <li>Hiring researchers before you have engineers who can ship.</li>
+    <li>Building an AI team that sits apart from the rest of engineering and product.</li>
+    <li>Leaving evaluation without a clear owner.</li>
+    <li>Treating "we can't hire" as "we can't do AI".</li>
+    <li>Measuring the team by demos instead of by what users actually rely on.</li>
+  </ul>
+
+  <p>Whether you're hiring ten people or none, the job is the same: put strong engineering at the centre, give evaluation a real owner, keep the team close to the people it serves, and help everyone grow. Good AI teams aren't just hired. Most of them are built.</p>
+
+  <div class="author-box">
+    <img src="../assets/headshot.jpg" alt="Farzaneh Farhadi, AI Engineering Leader" width="64" height="64" loading="lazy">
+    <p><strong>Farzaneh Farhadi, PhD</strong> is an AI engineering leader who has hired, grown and led engineering and data science teams, and builds agentic AI systems. <a href="../index.html">More about me →</a></p>
+  </div>
+
+  <p class="disclaimer">Views are my own and don't represent my employer or its clients.</p>
+</main>
+</body>
+</html>
