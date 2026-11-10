@@ -105,7 +105,7 @@ section > .container > h2::before {
   mask-image: linear-gradient(to bottom, #000, transparent 85%);
 }
 .hero .container { position: relative; z-index: 1; display: grid; grid-template-columns: 1.5fr 1fr; gap: 64px; align-items: center; }
-.eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: .8rem; font-weight: 600; color: var(--gold); margin-bottom: 18px; }
+.eyebrow { letter-spacing: .04em; font-size: .95rem; font-weight: 600; color: var(--gold); margin-bottom: 18px; }
 .hero h1 { color: #fff; }
 .hero h1 em { font-style: normal; color: var(--gold); }
 .lead { font-size: 1.2rem; color: var(--muted); max-width: 36em; }
