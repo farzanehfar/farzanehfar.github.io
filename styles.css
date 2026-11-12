@@ -297,3 +297,10 @@ footer a:hover { color: var(--gold); }
 .article table.roles th { text-align: left; background: var(--navy); color: var(--gold); font-weight: 600; font-size: .85rem; letter-spacing: .04em; text-transform: uppercase; padding: 12px 16px; }
 .article table.roles td { padding: 12px 16px; border-top: 1px solid var(--line); vertical-align: top; line-height: 1.5; }
 .article table.roles td:first-child { width: 34%; color: var(--navy); }
+.article table.data { width: 100%; border-collapse: collapse; margin: 1.5em 0; font-size: .95rem; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px -22px rgba(14, 42, 53, .3); }
+.article table.data th { text-align: left; background: var(--navy); color: var(--gold); font-weight: 600; font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; padding: 11px 14px; }
+.article table.data td { padding: 11px 14px; border-top: 1px solid var(--line); vertical-align: top; line-height: 1.5; }
+.article table.data tr:last-child td { border-bottom: 0; }
+@media (max-width: 640px) { .article table.data { display: block; overflow-x: auto; font-size: .88rem; } }
+.post-card:last-child:nth-child(even) { grid-column: span 2; }
+@media (max-width: 860px) { .post-card:last-child:nth-child(even) { grid-column: auto; } }

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beyond the buzzwords: 7 AI engineering concepts and the questions that matter · Farzaneh Farhadi</title>
+  <meta name="description" content="RAG, agents, LangGraph, MCP, vector databases, fine-tuning and evaluation: what each one is, when to use it, when not to, and the follow-up questions that show real understanding.">
+  <meta name="author" content="Farzaneh Farhadi">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#0e2a35">
+  <link rel="canonical" href="https://farzanehfar.github.io/writing/ai-engineering-concepts.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Farzaneh Farhadi">
+  <meta property="og:url" content="https://farzanehfar.github.io/writing/ai-engineering-concepts.html">
+  <meta property="og:title" content="Beyond the buzzwords: 7 AI engineering concepts and the questions that matter">
+  <meta property="og:description" content="RAG, agents, LangGraph, MCP, vector databases, fine-tuning and evaluation, explained through one example, with the follow-up questions that show real understanding.">
+  <meta property="og:image" content="https://farzanehfar.github.io/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="627">
+  <meta property="og:locale" content="en_GB">
+  <meta property="article:published_time" content="2026-11-11">
+  <meta property="article:author" content="Farzaneh Farhadi">
+  <meta property="article:section" content="AI engineering">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Beyond the buzzwords: 7 AI engineering concepts and the questions that matter">
+  <meta name="twitter:description" content="RAG, agents, LangGraph, MCP, vector databases, fine-tuning and evaluation, explained through one example, with the follow-up questions that show real understanding.">
+  <meta name="twitter:image" content="https://farzanehfar.github.io/assets/og-image.jpg">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Beyond the buzzwords: 7 AI engineering concepts and the questions that matter",
+    "description": "RAG, agents, LangGraph, MCP, vector databases, fine-tuning and evaluation: what each one is, when to use it, when not to, and the follow-up questions that show real understanding.",
+    "datePublished": "2026-11-11",
+    "dateModified": "2026-11-11",
+    "inLanguage": "en-GB",
+    "articleSection": "AI engineering",
+    "keywords": "RAG, AI agents, LangGraph, MCP, Model Context Protocol, vector database, embeddings, fine-tuning, LoRA, LLM evaluation, AI engineering concepts, AI engineer",
+    "mainEntityOfPage": "https://farzanehfar.github.io/writing/ai-engineering-concepts.html",
+    "url": "https://farzanehfar.github.io/writing/ai-engineering-concepts.html",
+    "image": "https://farzanehfar.github.io/assets/headshot.jpg",
+    "author": { "@type": "Person", "@id": "https://farzanehfar.github.io/#person", "name": "Farzaneh Farhadi", "url": "https://farzanehfar.github.io/" },
+    "publisher": { "@type": "Person", "@id": "https://farzanehfar.github.io/#person", "name": "Farzaneh Farhadi" }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Farzaneh Farhadi</a>
+    <nav class="nav">
+      <a href="../index.html#impact">Impact</a>
+      <a href="../index.html#writing">Writing</a>
+      <a class="nav-cta" href="../index.html#contact">Get in touch</a>
+    </nav>
+  </div>
+</header>
+
+<div class="article-hero">
+  <div class="inner">
+    <a class="back" href="../index.html#writing">← All writing</a>
+    <h1>Beyond the buzzwords: 7 AI engineering concepts and the questions that matter</h1>
+    <p class="meta">November 2026 · 14 min read · AI engineering</p>
+  </div>
+</div>
+
+<main class="article">
+  <p>RAG. Agents. LangGraph. MCP. Vector databases. Fine-tuning. Evaluation. These seven terms come up in almost every conversation about building AI systems today, and most people working in the field can give a quick definition of each.</p>
+
+  <p>But a definition is only the start. Real understanding shows in the follow-up questions. When would you use it, and when wouldn't you? How would you know it's working? What goes wrong in practice? Those are the questions that matter when you're building something people will rely on.</p>
+
+  <p>This guide covers all seven concepts in the same way: what each one is in plain English, a simple example, when to use it and when not to, the follow-up questions worth being able to answer, and a common mistake. We'll use one example throughout, so by the end you'll see how the pieces fit together.</p>
+
+  <h2>Our example: an HR assistant</h2>
+
+  <p>Imagine a company builds an AI assistant for its employees. It should be able to:</p>
+  <ul>
+    <li>answer policy questions, like <em>"How much parental leave do I get?"</em></li>
+    <li>check personal information, like <em>"How many holiday days do I have left?"</em></li>
+    <li>take simple actions, like <em>"Book Friday off for me."</em></li>
+  </ul>
+  <p>Each of the seven concepts plays a part in building this assistant well.</p>
+
+  <h2>1. RAG (retrieval-augmented generation)</h2>
+
+  <p><strong>What it is:</strong> a way to make a language model answer from <em>your</em> information. When a question comes in, the system first <strong>finds</strong> relevant pieces of your documents (retrieval), then gives them to the model to <strong>write</strong> an answer (generation).</p>
+
+  <p><strong>In our example:</strong> for <em>"How much parental leave do I get?"</em>, the assistant searches the HR policy documents, finds the parental leave policy, and answers from it, ideally with a link to the source.</p>
+
+  <p><strong>Use it when</strong> answers depend on information the model wasn't trained on, or that changes often: internal policies, product documentation, recent data. <strong>Don't use it when</strong> the question needs live personal data (that's a tool call, see MCP below), or when a simple database lookup would do.</p>
+
+  <p><strong>The follow-up questions:</strong></p>
+  <ul>
+    <li><strong>"How would you improve its accuracy?"</strong> First work out <em>where</em> it's failing: is it finding the wrong documents, or finding the right ones and writing a bad answer? Then fix that step, for example with better chunking or reranking for retrieval, or clearer instructions for generation.</li>
+    <li><strong>"How would you know it improved?"</strong> Test it on a fixed set of questions with known answers before and after the change, and compare the scores.</li>
+    <li><strong>"What happens when the answer isn't in the documents?"</strong> It should say so clearly, not guess. This needs to be designed and tested.</li>
+  </ul>
+
+  <p><strong>Common mistake:</strong> judging RAG only by whether answers <em>sound</em> right. A fluent answer can still be built on the wrong document. I've written a full guide to this: <a href="rag-evaluation-explained.html">Is your RAG system actually working?</a></p>
+
+  <h2>2. Vector databases</h2>
+
+  <p><strong>What it is:</strong> a database built to search by <em>meaning</em>, not exact words. Each piece of text is turned into an <strong>embedding</strong>: a long list of numbers that represents its meaning, so that similar ideas end up close together. A vector database stores these embeddings and quickly finds the ones closest to a question.</p>
+
+  <p><strong>In our example:</strong> an employee asks, <em>"Can I take time off when my baby is born?"</em> The policy is titled "Parental leave" and never uses the word "baby". Keyword search might miss it. Meaning-based search finds it, because the two ideas are close.</p>
+
+  <p><strong>Use it when</strong> you need to search large amounts of text by meaning, which is the "retrieval" part of most RAG systems. <strong>You may not need a dedicated one when</strong> your document set is small, or your existing database or search engine already supports vector search. Many teams start with an extension to a database they already run and only move to a specialised product when scale demands it.</p>
+
+  <p><strong>The follow-up questions:</strong></p>
+  <ul>
+    <li><strong>"Do you really need a separate vector database?"</strong> Often not at first. The right answer depends on data size, speed needs, and what your team already knows how to run.</li>
+    <li><strong>"How do you keep it up to date?"</strong> When a document changes or is deleted, its embeddings must be updated or removed too. Otherwise the assistant keeps answering from an old policy.</li>
+    <li><strong>"Is meaning-based search always better?"</strong> No. It can miss exact terms like policy codes, names or numbers. Many systems combine it with keyword search, which is called <strong>hybrid search</strong>.</li>
+    <li><strong>"Who's allowed to see what?"</strong> If some documents are restricted, the search must respect those permissions, not just return the closest match.</li>
+  </ul>
+
+  <p><strong>Common mistake:</strong> treating the vector database as the main design decision. In practice, how you split documents into chunks, which embedding model you use, and how you keep data fresh matter far more than which product you pick.</p>
+
+  <h2>3. Fine-tuning</h2>
+
+  <p><strong>What it is:</strong> taking an existing model and training it further on your own examples, so a particular behaviour becomes part of the model. Modern approaches often train only a small set of extra parameters rather than the whole model, which makes fine-tuning much cheaper. LoRA is a well-known example of this.</p>
+
+  <p><strong>In our example:</strong> the HR team receives thousands of requests and wants each one sorted into one of 30 internal categories, in a fixed format, every time. A small model fine-tuned on a few thousand past requests that people have already labelled can do this quickly, cheaply and consistently.</p>
+
+  <p><strong>Use it when</strong> you need a consistent behaviour, style or format that prompting can't make reliable, or when a smaller specialised model would save real cost at high volume. <strong>Don't use it to teach the model facts that change</strong>, like this year's holiday policy. That's what RAG is for. A fine-tuned model can't tell you where its answer came from, and it goes out of date the moment the policy changes.</p>
+
+  <p><strong>The follow-up questions:</strong></p>
+  <ul>
+    <li><strong>"Why fine-tune instead of using RAG or a better prompt?"</strong> A simple rule: RAG for what the model needs to <em>know</em>, fine-tuning for how it needs to <em>behave</em>, and always try a good prompt first.</li>
+    <li><strong>"How much data do you need?"</strong> Usually hundreds to a few thousand good examples for a focused task. Quality matters far more than quantity.</li>
+    <li><strong>"How do you know it worked?"</strong> Test on examples the model never saw during training, and compare against the original model with a good prompt. Also check it hasn't got worse at things it used to do well.</li>
+    <li><strong>"What does it cost to maintain?"</strong> Training data to keep current, retraining when needs change, and model versions to track. Fine-tuning is a commitment, not a one-off.</li>
+  </ul>
+
+  <p><strong>Common mistake:</strong> reaching for fine-tuning first because it feels more advanced. Most problems are solved more cheaply with better prompts or better retrieval. I go deeper on this choice in <a href="agentic-ai-architecture.html">What actually matters when you design an agentic AI system</a>.</p>
+
+  <h2>4. Agents</h2>
+
+  <p><strong>What it is:</strong> a system where a language model doesn't just answer, but <strong>decides what to do next</strong>. It can choose which tools to use, look at the results, and take further steps until the task is done. The key difference from a normal chatbot is that the model controls part of the process.</p>
+
+  <p><strong>In our example:</strong> <em>"Book Friday off for me."</em> The agent checks the employee's remaining holiday balance, checks the team calendar for conflicts, submits the request, and confirms. Several steps, decided by the agent, using different tools.</p>
+
+  <p><strong>Use it when</strong> a task needs several steps, and the right next step depends on what was found in the previous one. <strong>Don't use it when</strong> the steps are always the same. A fixed workflow, where the model only does specific steps, is easier to test, more predictable and cheaper. Many systems described as "agents" work best as well-designed workflows with the model making decisions only where judgement is really needed.</p>
+
+  <p><strong>The follow-up questions:</strong></p>
+  <ul>
+    <li><strong>"Agent or workflow, and why?"</strong> Use the least freedom that solves the problem. Give the model more control only where it genuinely helps.</li>
+    <li><strong>"What stops it from looping forever or spending too much?"</strong> Limits on steps, time and cost, and a clear way to stop and say "I couldn't complete this".</li>
+    <li><strong>"What is it allowed to do without asking?"</strong> Reading information can often be automatic. Actions with real consequences, like submitting a request, may need the person to confirm.</li>
+    <li><strong>"How do you test it?"</strong> Check both the final result <em>and</em> the steps it took. An agent can reach the right answer for the wrong reasons, and that will eventually fail.</li>
+  </ul>
+
+  <p><strong>Common mistake:</strong> making everything an agent. Autonomy makes systems harder to predict, test and explain. It should be used where it adds value, not by default.</p>
+
+  <h2>5. LangGraph</h2>
+
+  <p><strong>What it is:</strong> an open-source framework for building agents and AI workflows as a <strong>graph</strong>. You define the steps as <strong>nodes</strong>, the possible paths between them as <strong>edges</strong>, and a shared <strong>state</strong>: the information that's passed along and updated as the work moves through the graph. Edges can be conditional, so the next step depends on what just happened. The graph can also loop back, pause for a person to approve something, and save its progress so it can resume later.</p>
+
+  <p><strong>In our example:</strong> the holiday booking flow becomes a small graph: <em>understand request → check balance → check calendar → (if there's a conflict, ask the employee) → submit → confirm</em>. Each box is a node, and the "if there's a conflict" decision is a conditional edge.</p>
+
+  <p><strong>Use it when</strong> your process has branches, loops, pauses for human approval, or needs to remember where it is across steps. Making the flow explicit as a graph makes it much easier to understand, test and debug than a free-running agent. <strong>Don't use it when</strong> your flow is a simple straight line. A few function calls are easier to read and maintain. It's also worth remembering that LangGraph is one framework among several. The underlying idea, making the flow explicit, matters more than the specific tool.</p>
+
+  <p><strong>The follow-up questions:</strong></p>
+  <ul>
+    <li><strong>"Why use a graph instead of letting the agent decide everything?"</strong> Because explicit paths are predictable and testable. You choose where the model has freedom and where it doesn't.</li>
+    <li><strong>"What's in the state, and why?"</strong> Only what later steps need. A bloated state makes the system harder to follow and more expensive to run.</li>
+    <li><strong>"What happens if a step fails halfway through?"</strong> With saved progress (checkpoints), the flow can retry or resume from the last good step instead of starting again, and without repeating actions like submitting a request twice.</li>
+    <li><strong>"How do you test it?"</strong> Test each node on its own, then test the important paths through the graph, including the failure paths.</li>
+  </ul>
+
+  <p><strong>Common mistake:</strong> knowing the framework but not the design. Being able to write LangGraph code is less valuable than knowing which steps should be fixed, which should be left to the model, and where a person should be involved.</p>
+
+  <h2>6. MCP (Model Context Protocol)</h2>
+
+  <p><strong>What it is:</strong> an open standard for connecting AI applications to tools and data. A common comparison is a <strong>USB port for AI</strong>: instead of building a custom connection for every combination of AI app and system, each system exposes its capabilities once through an <strong>MCP server</strong>, and any compatible AI app can use them. An MCP server can offer <strong>tools</strong> (actions, like "submit leave request"), <strong>resources</strong> (data, like "employee holiday balance") and <strong>prompts</strong> (reusable instructions).</p>
+
+  <p><strong>In our example:</strong> the HR system gets an MCP server offering "get holiday balance", "get team calendar" and "submit leave request". The assistant uses them, and so could any other AI tool the company adopts later, without new integration work.</p>
+
+  <p><strong>Use it when</strong> several AI applications or agents need the same tools, or you want a consistent, reusable way to connect AI to internal systems. <strong>It may be unnecessary when</strong> you have one simple integration used by one application. A direct function call is fine there.</p>
+
+  <p><strong>The follow-up questions:</strong></p>
+  <ul>
+    <li><strong>"How is MCP different from just calling an API?"</strong> Under the hood, an MCP server usually still calls your normal APIs. What MCP adds is a standard way for AI applications to <em>discover</em> available tools, understand what they do, and call them in the same way everywhere.</li>
+    <li><strong>"How do you control what the AI is allowed to do?"</strong> Authentication, and least-privilege permissions: the assistant should only access what the employee it's helping can access. Every call should be logged, and high-impact actions should need approval.</li>
+    <li><strong>"Can tool results be trusted?"</strong> Not blindly. Text returned by a tool, like a document or an email, could contain instructions trying to manipulate the AI. This is called <strong>prompt injection</strong>, and tool outputs should be treated as untrusted data.</li>
+    <li><strong>"How do you change a tool without breaking things?"</strong> Clear descriptions and versioning, the same discipline as any API.</li>
+  </ul>
+
+  <p><strong>Common mistake:</strong> giving an agent broad access "to make it work". Convenience now becomes a security problem later.</p>
+
+  <h2>7. Evaluation</h2>
+
+  <p><strong>What it is:</strong> measuring whether your AI system actually does what it should, reliably, and whether a change made it better or worse. It's the concept that connects all the others, because every one of them raises the same question: <em>how do you know it's working?</em></p>
+
+  <p><strong>In our example:</strong> before each release, the HR assistant is tested on a fixed set of real questions with known correct answers and known source documents. Retrieval is scored on whether it found the right policy. Answers are scored on whether they're correct and supported by the sources. Actions are tested on whether the right steps were taken, and whether the assistant asked for confirmation when it should. After launch, employee feedback and repeated questions show how it's doing in real life.</p>
+
+  <p><strong>Use it:</strong> always. This is the one concept with no "when not to".</p>
+
+  <p><strong>The follow-up questions:</strong></p>
+  <ul>
+    <li><strong>"Which metrics would you track?"</strong> It depends on the part. For retrieval: Precision@K and Recall@K. For answers: correctness and faithfulness, meaning every claim is supported by the sources. For agents: task success, the steps taken, and errors. Plus latency and cost for everything.</li>
+    <li><strong>"How would you build a test set?"</strong> Start with real questions, have experts record the correct answers and sources, and include hard cases and questions with no answer. Start with 50 to 100 and grow it from real failures.</li>
+    <li><strong>"Offline or online?"</strong> Both. Offline testing on a fixed set before release; online monitoring of real use afterwards.</li>
+    <li><strong>"Can an AI grade the AI?"</strong> Yes. It's called <strong>LLM-as-a-judge</strong>, and it's useful for scale, but only after checking its scores against human experts on the same answers.</li>
+  </ul>
+
+  <p><strong>Common mistake:</strong> treating evaluation as something to add at the end. It should come first. Without a way to measure, every other decision on this list is a guess. I've written more about this for <a href="rag-evaluation-explained.html">RAG systems</a> and for <a href="validating-agentic-ai.html">AI agents</a>.</p>
+
+  <h2>How they fit together</h2>
+
+  <p>Here's the complete HR assistant, with each concept in its place:</p>
+
+  <table class="data">
+    <thead><tr><th>Employee asks…</th><th>What happens</th><th>Concepts involved</th></tr></thead>
+    <tbody>
+      <tr><td>"How much parental leave do I get?"</td><td>Meaning-based search finds the policy; the model answers from it and links the source.</td><td>RAG, vector database</td></tr>
+      <tr><td>"How many holiday days do I have left?"</td><td>The assistant calls the HR system through a tool and reports the balance.</td><td>MCP</td></tr>
+      <tr><td>"Book Friday off for me."</td><td>A multi-step flow checks the balance and calendar, asks for confirmation, then submits.</td><td>Agents, LangGraph, MCP</td></tr>
+      <tr><td>Every incoming request</td><td>A small specialised model sorts it into the right category and routes it.</td><td>Fine-tuning</td></tr>
+      <tr><td>Before every release, and after launch</td><td>A fixed test set checks retrieval, answers and actions; real usage is monitored.</td><td>Evaluation</td></tr>
+    </tbody>
+  </table>
+
+  <p>Seen this way, the seven terms aren't a list of buzzwords to collect. They're parts of one system, each chosen for a specific job.</p>
+
+  <h2>The pattern behind every follow-up question</h2>
+
+  <p>If you look back at the follow-up questions across all seven concepts, the same four keep appearing:</p>
+  <ol>
+    <li><strong>When would you use it, and when wouldn't you?</strong></li>
+    <li><strong>How would you know it's working?</strong></li>
+    <li><strong>What can go wrong, and how would you handle it?</strong></li>
+    <li><strong>What does it cost to build and to maintain?</strong></li>
+  </ol>
+
+  <p>Being able to answer these for any tool is what turns knowing the names of things into knowing how to build with them. And that's the real skill. New frameworks and terms will keep arriving, but these four questions will apply to every one of them.</p>
+
+  <h2>Quick reference</h2>
+  <table class="data">
+    <thead><tr><th>Concept</th><th>In one sentence</th><th>The key follow-up</th></tr></thead>
+    <tbody>
+      <tr><td><strong>RAG</strong></td><td>Find relevant information, then answer from it.</td><td>Is it failing at finding, or at answering?</td></tr>
+      <tr><td><strong>Vector database</strong></td><td>Stores meaning as numbers and searches by similarity.</td><td>Do you need a separate one, and how do you keep it fresh?</td></tr>
+      <tr><td><strong>Fine-tuning</strong></td><td>Further training a model on your examples.</td><td>Is this about knowledge (use RAG) or behaviour?</td></tr>
+      <tr><td><strong>Agents</strong></td><td>The model decides the next step and uses tools.</td><td>Would a fixed workflow be simpler and safer?</td></tr>
+      <tr><td><strong>LangGraph</strong></td><td>Builds agent flows as explicit graphs with shared state.</td><td>Which steps are fixed, and which are left to the model?</td></tr>
+      <tr><td><strong>MCP</strong></td><td>A standard way to connect AI to tools and data.</td><td>What is it allowed to do, and can tool results be trusted?</td></tr>
+      <tr><td><strong>Evaluation</strong></td><td>Measuring whether the system works and changes help.</td><td>How would you know it improved?</td></tr>
+    </tbody>
+  </table>
+
+  <div class="author-box">
+    <img src="../assets/headshot.jpg" alt="Farzaneh Farhadi, Engineering Manager, AI and Software Platforms" width="64" height="64" loading="lazy">
+    <p><strong>Farzaneh Farhadi, PhD</strong> is an engineering manager for AI and software platforms who builds and evaluates production AI systems. <a href="../index.html">More about me →</a></p>
+  </div>
+
+  <p class="disclaimer">Views are my own and don't represent my employer or its clients.</p>
+</main>
+</body>
+</html>

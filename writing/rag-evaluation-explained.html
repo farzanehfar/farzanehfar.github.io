@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Is your RAG system actually working? A practical guide to evaluation · Farzaneh Farhadi</title>
+  <meta name="description" content="A plain-English guide to RAG evaluation: how to improve accuracy, Precision@K, Recall@K, MRR, faithfulness, building a test dataset, LLM-as-a-judge, and offline vs online evaluation, with worked examples.">
+  <meta name="author" content="Farzaneh Farhadi">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#0e2a35">
+  <link rel="canonical" href="https://farzanehfar.github.io/writing/rag-evaluation-explained.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Farzaneh Farhadi">
+  <meta property="og:url" content="https://farzanehfar.github.io/writing/rag-evaluation-explained.html">
+  <meta property="og:title" content="Is your RAG system actually working? A practical guide to evaluation">
+  <meta property="og:description" content="How to know whether your RAG system actually works: the key metrics, a worked example, and how to build a test set.">
+  <meta property="og:image" content="https://farzanehfar.github.io/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="627">
+  <meta property="og:locale" content="en_GB">
+  <meta property="article:published_time" content="2026-11-11">
+  <meta property="article:author" content="Farzaneh Farhadi">
+  <meta property="article:section" content="AI engineering">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Is your RAG system actually working? A practical guide to evaluation">
+  <meta name="twitter:description" content="How to know whether your RAG system actually works: the key metrics, a worked example, and how to build a test set.">
+  <meta name="twitter:image" content="https://farzanehfar.github.io/assets/og-image.jpg">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Is your RAG system actually working? A practical guide to evaluation",
+    "description": "A plain-English guide to RAG evaluation: how to improve accuracy, Precision@K, Recall@K, MRR, faithfulness, building a test dataset, LLM-as-a-judge, and offline vs online evaluation, with worked examples.",
+    "datePublished": "2026-11-11",
+    "dateModified": "2026-11-11",
+    "inLanguage": "en-GB",
+    "articleSection": "AI engineering",
+    "keywords": "RAG evaluation, retrieval-augmented generation, Precision@K, Recall@K, MRR, hit rate, faithfulness, answer relevance, ground truth dataset, golden dataset, LLM-as-a-judge, offline evaluation, online evaluation, reranking, chunking",
+    "mainEntityOfPage": "https://farzanehfar.github.io/writing/rag-evaluation-explained.html",
+    "url": "https://farzanehfar.github.io/writing/rag-evaluation-explained.html",
+    "image": "https://farzanehfar.github.io/assets/headshot.jpg",
+    "author": { "@type": "Person", "@id": "https://farzanehfar.github.io/#person", "name": "Farzaneh Farhadi", "url": "https://farzanehfar.github.io/" },
+    "publisher": { "@type": "Person", "@id": "https://farzanehfar.github.io/#person", "name": "Farzaneh Farhadi" }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Farzaneh Farhadi</a>
+    <nav class="nav">
+      <a href="../index.html#impact">Impact</a>
+      <a href="../index.html#writing">Writing</a>
+      <a class="nav-cta" href="../index.html#contact">Get in touch</a>
+    </nav>
+  </div>
+</header>
+
+<div class="article-hero">
+  <div class="inner">
+    <a class="back" href="../index.html#writing">← All writing</a>
+    <h1>Is your RAG system actually working? A practical guide to evaluation</h1>
+    <p class="meta">November 2026 · 12 min read · AI engineering</p>
+  </div>
+</div>
+
+<main class="article">
+  <p>Most guides to RAG teach you how to build one. Far fewer explain how to tell whether it's any good, or whether the change you made last week made it better or worse.</p>
+
+  <p>That second skill matters more than it sounds. Without it, every improvement is a guess. With it, you can make changes confidently, explain your results to anyone, and catch problems before your users do.</p>
+
+  <p>This guide explains RAG evaluation from the ground up, in plain English. We'll use one simple example the whole way through, work through real numbers by hand, and cover every term you're likely to come across. You don't need a machine learning background to follow it.</p>
+
+  <h2>RAG in 30 seconds</h2>
+
+  <p>RAG stands for <strong>retrieval-augmented generation</strong>. When someone asks a question, a RAG system does two things:</p>
+  <ol>
+    <li><strong>Retrieval:</strong> it searches your documents and <strong>finds</strong> the most relevant pieces of text.</li>
+    <li><strong>Generation:</strong> it gives those pieces to a language model, which <strong>writes</strong> an answer based on them.</li>
+  </ol>
+
+  <p><strong>Our example for this guide</strong> is an <strong>HR policy assistant</strong>. An employee asks, <em>"How much parental leave do I get?"</em> The assistant searches the company's HR documents, finds the parental leave policy, and writes an answer from it.</p>
+
+  <blockquote>The most important idea in this guide: RAG has two steps, so it has two places to go wrong. It can find the wrong information, or it can find the right information and still write a bad answer.</blockquote>
+
+  <p>Almost everything about evaluating RAG comes back to measuring these two steps separately. If you only look at the final answer, you'll know something is wrong, but not where.</p>
+
+  <h2>Part 1: How do you improve a RAG system's accuracy?</h2>
+
+  <p>The tempting answer is a list of techniques. But the honest first step is <strong>diagnosis</strong>: find out which of the two steps is failing. Look at some bad answers and ask:</p>
+  <ul>
+    <li><strong>Were the right documents found?</strong> If not, it's a <strong>retrieval problem</strong>.</li>
+    <li><strong>Were the right documents found, but the answer was still wrong?</strong> Then it's a <strong>generation problem</strong>.</li>
+  </ul>
+
+  <p>Once you know where the problem is, here are the most common fixes, in plain terms.</p>
+
+  <h3>Fixing retrieval (finding the right information)</h3>
+  <table class="data">
+    <thead><tr><th>Technique</th><th>What it means</th><th>When it helps</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Better chunking</strong></td><td>Documents are split into smaller pieces ("chunks") before searching. Splitting them in better places, like by section instead of every 500 words, keeps related information together.</td><td>Answers are cut in half, or chunks mix unrelated topics.</td></tr>
+      <tr><td><strong>Better embeddings</strong></td><td>An embedding turns text into numbers that capture its meaning, so similar ideas end up close together. A better embedding model understands your domain's language better.</td><td>The system misses documents that use different words for the same idea.</td></tr>
+      <tr><td><strong>Hybrid search</strong></td><td>Combining meaning-based search with traditional keyword search.</td><td>Questions contain exact terms, codes or names that must match.</td></tr>
+      <tr><td><strong>Reranking</strong></td><td>Retrieve a larger set of candidates first, then use a second, more careful model to reorder them and keep only the best.</td><td>The right document is found, but buried below less useful ones.</td></tr>
+      <tr><td><strong>Metadata filters</strong></td><td>Narrowing the search using labels like country, department or date.</td><td>Answers come from the wrong region or an out-of-date policy.</td></tr>
+      <tr><td><strong>Query rewriting</strong></td><td>Rephrasing the user's question into a clearer search query before searching.</td><td>Questions are short, vague or conversational.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Fixing generation (writing a good answer)</h3>
+  <ul>
+    <li><strong>Clearer instructions:</strong> tell the model to answer only from the provided text, and to say "I don't know" when the answer isn't there.</li>
+    <li><strong>Ask for sources:</strong> require the model to point to which document each part of the answer came from.</li>
+    <li><strong>Give it less, but better, context:</strong> too many loosely related chunks can confuse the model as much as too few.</li>
+    <li><strong>A stronger model</strong>, if the questions need more careful reasoning.</li>
+  </ul>
+
+  <p>Each of these is reasonable. But notice the problem: how would you know which one actually helped? That's the next question.</p>
+
+  <h2>Part 2: How do you know it actually improved?</h2>
+
+  <p>"It seems better" isn't evidence. The reliable way to know is a simple, repeatable process:</p>
+  <ol>
+    <li><strong>Build a fixed test set:</strong> a list of questions where you already know the right answer and the right documents. (Part 4 covers how.)</li>
+    <li><strong>Measure the current system on it.</strong> This is your <strong>baseline</strong>.</li>
+    <li><strong>Make one change at a time.</strong> If you change three things at once, you won't know which one helped or hurt.</li>
+    <li><strong>Run the same test set again</strong> and compare the numbers.</li>
+    <li><strong>Check that nothing else got worse.</strong> A change that improves one type of question can quietly break another.</li>
+  </ol>
+
+  <p>There are two kinds of evaluation, and you need both:</p>
+  <table class="data">
+    <thead><tr><th></th><th>Offline evaluation</th><th>Online evaluation</th></tr></thead>
+    <tbody>
+      <tr><td><strong>What</strong></td><td>Testing against your fixed test set</td><td>Measuring how real users experience the system</td></tr>
+      <tr><td><strong>When</strong></td><td>Before a change goes live</td><td>After it goes live</td></tr>
+      <tr><td><strong>Strength</strong></td><td>Fast, repeatable and safe. You can compare versions fairly.</td><td>Reflects real questions and real behaviour</td></tr>
+      <tr><td><strong>Weakness</strong></td><td>Only as good as your test set</td><td>Slower, noisier, and users see your mistakes</td></tr>
+    </tbody>
+  </table>
+  <p>User feedback is valuable, but it belongs in the second column. It tells you how things are going in real life. It's too slow and too noisy to be your only way of deciding whether a change is ready.</p>
+
+  <h2>Part 3: Which metrics should you track?</h2>
+
+  <p>Because RAG has two steps, the metrics come in two groups, plus a few that describe the whole system.</p>
+
+  <h3>Retrieval metrics: did it find the right information?</h3>
+
+  <p>Two terms first. The system usually retrieves a fixed number of chunks, called <strong>K</strong>. If K = 3, it returns the top 3 results. And a document is <strong>relevant</strong> if it actually contains information needed to answer the question.</p>
+
+  <table class="data">
+    <thead><tr><th>Metric</th><th>The question it answers</th><th>How it's calculated</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Precision@K</strong></td><td>Of the K results it returned, how many were useful?</td><td>relevant results in top K ÷ K</td></tr>
+      <tr><td><strong>Recall@K</strong></td><td>Of all the useful documents that exist, how many did it find?</td><td>relevant results in top K ÷ total relevant documents</td></tr>
+      <tr><td><strong>Hit rate@K</strong></td><td>Did it find at least one useful document?</td><td>1 if yes, 0 if no, averaged over all questions</td></tr>
+      <tr><td><strong>MRR</strong> (mean reciprocal rank)</td><td>How high up was the first useful result?</td><td>1 ÷ position of the first relevant result (1st = 1, 2nd = 0.5, 3rd = 0.33), averaged</td></tr>
+    </tbody>
+  </table>
+
+  <p>A simple way to remember the difference: <strong>precision is about not bringing back rubbish, and recall is about not missing anything important.</strong> They often pull against each other. Retrieving more results usually raises recall but lowers precision.</p>
+
+  <h3>A worked example</h3>
+
+  <p>Let's test our HR assistant on three questions with K = 3. For each question, we already know which documents are relevant (marked ✓).</p>
+
+  <table class="data">
+    <thead><tr><th>Question</th><th>Top 3 retrieved</th><th>Relevant documents that exist</th></tr></thead>
+    <tbody>
+      <tr><td>1. How much parental leave do I get?</td><td>① Parental leave policy ✓<br>② Holiday policy<br>③ Sick leave policy</td><td>2 (Parental leave policy, Pay during leave)</td></tr>
+      <tr><td>2. Can I work from abroad?</td><td>① Travel expenses<br>② Remote working policy ✓<br>③ Equipment policy</td><td>1 (Remote working policy)</td></tr>
+      <tr><td>3. How do I claim a train ticket?</td><td>① Travel expenses policy ✓<br>② Expenses system guide ✓<br>③ Holiday policy</td><td>2 (Travel expenses policy, Expenses system guide)</td></tr>
+    </tbody>
+  </table>
+
+  <p>Now the scores for each question:</p>
+
+  <table class="data">
+    <thead><tr><th>Question</th><th>Precision@3</th><th>Recall@3</th><th>Hit</th><th>Reciprocal rank</th></tr></thead>
+    <tbody>
+      <tr><td>1. Parental leave</td><td>1 ÷ 3 = 0.33</td><td>1 ÷ 2 = 0.50</td><td>1</td><td>1 ÷ 1 = 1.00</td></tr>
+      <tr><td>2. Work abroad</td><td>1 ÷ 3 = 0.33</td><td>1 ÷ 1 = 1.00</td><td>1</td><td>1 ÷ 2 = 0.50</td></tr>
+      <tr><td>3. Train ticket</td><td>2 ÷ 3 = 0.67</td><td>2 ÷ 2 = 1.00</td><td>1</td><td>1 ÷ 1 = 1.00</td></tr>
+      <tr><td><strong>Average</strong></td><td><strong>0.44</strong></td><td><strong>0.83</strong></td><td><strong>1.00</strong></td><td><strong>MRR = 0.83</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>What this tells us:</strong> recall is fairly good (0.83). The system usually finds the useful documents, and it always finds at least one (hit rate 1.00). But precision is low (0.44): more than half of what it returns isn't relevant. And for question 1, it missed the "Pay during leave" document entirely, so the answer might leave out pay details.</p>
+
+  <p>That points to clear next steps: a <strong>reranker</strong> to push irrelevant results down, and a look at why the pay document wasn't found (perhaps chunking or wording). After making one change, we'd run the same three questions again and compare. That's evaluation in action.</p>
+
+  <h3>Generation metrics: did it write a good answer?</h3>
+
+  <table class="data">
+    <thead><tr><th>Metric</th><th>The question it answers</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Faithfulness</strong> (or groundedness)</td><td>Is every claim in the answer supported by the retrieved documents? This is how you catch "hallucinations", where the model makes things up.</td></tr>
+      <tr><td><strong>Answer relevance</strong></td><td>Does the answer actually address the question that was asked?</td></tr>
+      <tr><td><strong>Correctness</strong></td><td>Does the answer match the known right answer in your test set?</td></tr>
+      <tr><td><strong>Completeness</strong></td><td>Does it include everything important, or leave key parts out?</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>A faithfulness example.</strong> Suppose the assistant answers:</p>
+  <blockquote>"You get 26 weeks of parental leave. The first 6 weeks are at full pay. You need to give 15 weeks' notice. You can take the leave in up to three separate blocks."</blockquote>
+  <p>We check each claim against the retrieved documents. The first three are in the policy. The fourth, about three blocks, appears nowhere. So 3 of 4 claims are supported, and <strong>faithfulness = 3 ÷ 4 = 0.75</strong>. It looks like a confident, helpful answer, but one quarter of it is invented. That's exactly the kind of problem this metric is designed to catch.</p>
+
+  <p>You may also see <strong>context precision</strong> and <strong>context recall</strong> in evaluation tools. They're versions of precision and recall that check whether the retrieved text contains what's needed for the correct answer. Different tools use slightly different names, but they all come back to the same two questions: did it find the right information, and did it use it faithfully?</p>
+
+  <h3>System metrics: does it work in real life?</h3>
+  <ul>
+    <li><strong>Latency:</strong> how long users wait for an answer.</li>
+    <li><strong>Cost per question:</strong> what each answer costs to produce.</li>
+    <li><strong>User feedback:</strong> thumbs up or down, comments and ratings.</li>
+    <li><strong>Behaviour signals:</strong> do people ask the same question again in different words, or escalate to a human? Both suggest the first answer didn't help.</li>
+  </ul>
+
+  <h2>Part 4: How do you build a test dataset?</h2>
+
+  <p>Everything above depends on having a good test set, sometimes called a <strong>ground-truth</strong> or <strong>golden</strong> dataset. Here's how to build one that's actually useful.</p>
+
+  <p><strong>1. Start from real questions.</strong> Collect questions people have actually asked: from search logs, support tickets, or by asking the people who will use the system. Real questions are messier than the ones you'd make up, and that's the point.</p>
+
+  <p><strong>2. For each question, record two things:</strong></p>
+  <ul>
+    <li>the <strong>correct answer</strong>, written or checked by someone who knows the subject, and</li>
+    <li>the <strong>relevant documents</strong> that contain that answer. This is what makes retrieval metrics possible.</li>
+  </ul>
+
+  <p><strong>3. Include the difficult cases on purpose:</strong></p>
+  <ul>
+    <li><strong>Questions with no answer</strong> in your documents. The right response is "I don't know", and you need to test that the system says it.</li>
+    <li><strong>Questions that need more than one document</strong>, like leave and pay together.</li>
+    <li><strong>Vague or badly worded questions</strong>, the way people really type.</li>
+    <li><strong>Questions where similar documents could confuse things</strong>, like an old policy and a new one.</li>
+  </ul>
+
+  <p><strong>4. Use AI to help, but check its work.</strong> A language model can draft extra questions and answers from your documents, which saves a lot of time. This is called a <strong>synthetic</strong> test set. But generated questions tend to be cleaner and easier than real ones, so have a person review them and keep only the good ones.</p>
+
+  <p><strong>5. Start small.</strong> 50 to 100 good questions is enough to begin. A small, carefully checked test set is far more useful than a large, unreliable one.</p>
+
+  <p><strong>6. Keep it fixed, and version it.</strong> If the test set changes every time you test, you can't compare results. When you do update it, save it as a new version, like v1 and v2.</p>
+
+  <p><strong>7. Grow it from real failures.</strong> Every time a user finds a bad answer, add that question to the test set. Over time, it becomes a record of every mistake you never want to repeat.</p>
+
+  <h2>Part 5: Who does the checking? People, or an AI judge?</h2>
+
+  <p>Some metrics can be calculated automatically, like precision and recall once you know the relevant documents. Others, like faithfulness and correctness, need judgement. There are two ways to get it.</p>
+
+  <p><strong>Human evaluation.</strong> Experts read answers and score them against a simple <strong>rubric</strong>: a short list of clear criteria, for example "Is it correct? Is it complete? Is every claim supported? Score 1 to 5." It's the most trustworthy method, but it's slow and expensive, so it's best for smaller samples and for checking anything important.</p>
+
+  <p><strong>LLM-as-a-judge.</strong> A second language model scores the answers using the same kind of rubric. It can check thousands of answers quickly and cheaply. But it has a catch: the judge can be wrong too. Before relying on it, ask it and your human experts to score the same set of answers, and compare. Only trust the judge where it agrees well with people. Then recheck that agreement from time to time.</p>
+
+  <p>In practice, the best approach combines both: automated metrics and an AI judge for scale, and human review for calibration and the cases that matter most.</p>
+
+  <h2>Part 6: Keep measuring after launch</h2>
+
+  <p>A RAG system can get worse without anyone touching it. Documents get updated, new topics appear, and the questions people ask change over time. This is called <strong>drift</strong>.</p>
+  <ul>
+    <li><strong>Re-run your test set on every change</strong> to the prompt, model, chunking or documents. A drop in scores before release is called a <strong>regression</strong>, and catching it early is the whole point.</li>
+    <li><strong>Watch online signals</strong> like feedback, repeated questions and escalations for sudden changes.</li>
+    <li><strong>Regularly sample real questions</strong> for human review, and add the failures to your test set.</li>
+  </ul>
+
+  <p>Evaluation isn't a one-off project. It's a loop: measure, change one thing, measure again, and keep watching.</p>
+
+  <h2>Quick reference: the key terms</h2>
+  <table class="data">
+    <thead><tr><th>Term</th><th>In one sentence</th></tr></thead>
+    <tbody>
+      <tr><td>RAG</td><td>Find relevant text, then write an answer from it.</td></tr>
+      <tr><td>Chunk</td><td>A small piece of a document, used for searching.</td></tr>
+      <tr><td>Embedding</td><td>Numbers that represent the meaning of text, so similar ideas are close together.</td></tr>
+      <tr><td>Reranking</td><td>A second pass that reorders search results to put the best first.</td></tr>
+      <tr><td>K</td><td>How many results the system retrieves.</td></tr>
+      <tr><td>Precision@K</td><td>Of what it found, how much was useful?</td></tr>
+      <tr><td>Recall@K</td><td>Of what's useful, how much did it find?</td></tr>
+      <tr><td>Hit rate@K</td><td>Did it find at least one useful result?</td></tr>
+      <tr><td>MRR</td><td>How high up the first useful result was, on average.</td></tr>
+      <tr><td>Faithfulness</td><td>Is everything in the answer supported by the sources?</td></tr>
+      <tr><td>Hallucination</td><td>When the model states something that isn't in its sources.</td></tr>
+      <tr><td>Ground truth / golden set</td><td>Test questions with known correct answers and documents.</td></tr>
+      <tr><td>Baseline</td><td>Your score before making a change.</td></tr>
+      <tr><td>Offline evaluation</td><td>Testing on your fixed test set before release.</td></tr>
+      <tr><td>Online evaluation</td><td>Measuring real user experience after release.</td></tr>
+      <tr><td>LLM-as-a-judge</td><td>Using a language model to score answers.</td></tr>
+      <tr><td>Regression</td><td>When a change makes results worse.</td></tr>
+      <tr><td>Drift</td><td>When performance changes over time because data or questions change.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>A checklist for your RAG system</h2>
+  <ul>
+    <li>Do we have a test set of real questions, with correct answers and relevant documents?</li>
+    <li>Does it include unanswerable, multi-document and badly worded questions?</li>
+    <li>Do we measure retrieval and generation separately?</li>
+    <li>Do we know our baseline scores?</li>
+    <li>Do we change one thing at a time and re-test?</li>
+    <li>Do we check faithfulness, not just whether the answer sounds right?</li>
+    <li>If we use an AI judge, have we checked it against human scores?</li>
+    <li>Do we re-run the test set on every change, and watch real usage after launch?</li>
+  </ul>
+
+  <p>Building a RAG system is the visible part of the work. Measuring it is what makes it trustworthy. Once you have a good test set and a handful of clear metrics, every improvement stops being a guess and becomes something you can prove.</p>
+
+  <p>If you're working with AI agents rather than question-answering systems, the same ideas apply, with a few extra challenges. I've written about those in <a href="validating-agentic-ai.html">How do you know your AI agent is right?</a></p>
+
+  <div class="author-box">
+    <img src="../assets/headshot.jpg" alt="Farzaneh Farhadi, Engineering Manager, AI and Software Platforms" width="64" height="64" loading="lazy">
+    <p><strong>Farzaneh Farhadi, PhD</strong> is an engineering manager for AI and software platforms who builds and evaluates production AI systems. <a href="../index.html">More about me →</a></p>
+  </div>
+
+  <p class="disclaimer">Views are my own and don't represent my employer or its clients.</p>
+</main>
+</body>
+</html>
